@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+
+    <servlet>
+        <servlet-name>StartupServlet</servlet-name>
+        <servlet-class>net.himadri.passwordmanager.service.StartupServlet</servlet-class>
+        <load-on-startup/>
+    </servlet>
+    <servlet>
+        <servlet-name>StoreManager</servlet-name>
+        <servlet-class>net.himadri.passwordmanager.service.StoreManager</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RetrieveManager</servlet-name>
+        <servlet-class>net.himadri.passwordmanager.service.RetrieveManager</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UserServlet</servlet-name>
+        <servlet-class>net.himadri.passwordmanager.service.UserServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EncodedUserIdServlet</servlet-name>
+        <servlet-class>net.himadri.passwordmanager.service.EncodedUserIdServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SecureRandomServlet</servlet-name>
+        <servlet-class>net.himadri.passwordmanager.service.SecureRandomServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StoreManager</servlet-name>
+        <url-pattern>/store</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RetrieveManager</servlet-name>
+        <url-pattern>/retrieve</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>UserServlet</servlet-name>
+        <url-pattern>/userService</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EncodedUserIdServlet</servlet-name>
+        <url-pattern>/encodedUserId</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SecureRandomServlet</servlet-name>
+        <url-pattern>/secureRandom</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>ObjectifyFilter</filter-name>
+        <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ObjectifyFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>securedapp</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>*</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>
