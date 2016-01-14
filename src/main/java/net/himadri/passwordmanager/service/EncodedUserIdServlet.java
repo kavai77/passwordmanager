@@ -15,13 +15,25 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 
 public class EncodedUserIdServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String operation = request.getParameter("operation");
         String encodedUserId = request.getParameter("encodedUserId");
-        if (StringUtils.isEmpty(encodedUserId)) {
+        if (StringUtils.isEmpty(operation) || StringUtils.isEmpty(encodedUserId)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        ofy().save().entity(new EncodedUserId(currentUser.getUserId(), encodedUserId, currentUser.getEmail()));
-        response.setStatus(HttpServletResponse.SC_CREATED);
+        switch (operation) {
+            case "store":
+                ofy().save().entity(new EncodedUserId(currentUser.getUserId(), encodedUserId, currentUser.getEmail()));
+                response.setStatus(HttpServletResponse.SC_CREATED);
+                break;
+            case "check":
+                EncodedUserId userId = ofy().load().type(EncodedUserId.class).id(currentUser.getUserId()).safe();
+                response.setStatus(StringUtils.equals(encodedUserId, userId.getEncoded())
+                        ? HttpServletResponse.SC_OK : HttpServletResponse.SC_UNAUTHORIZED);
+                break;
+            default:
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        }
     }
 }

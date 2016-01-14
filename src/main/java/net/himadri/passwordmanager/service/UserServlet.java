@@ -33,7 +33,7 @@ public class UserServlet extends HttpServlet {
         jsonObject.addProperty("nickName", user.getNickname());
         jsonObject.addProperty("logoutURL", userService.createLogoutURL("/index.html"));
         EncodedUserId encodedUserId = ofy().load().type(EncodedUserId.class).id(user.getUserId()).now();
-        jsonObject.addProperty("encodedUserId", encodedUserId != null ? encodedUserId.getEncoded() : null);
+        jsonObject.addProperty("encodedUserId", encodedUserId != null);
         gson.toJson(jsonObject, new JsonWriter(response.getWriter()));
     }
 

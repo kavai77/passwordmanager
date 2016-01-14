@@ -1,11 +1,14 @@
 var app=angular.module('app', []);
+
 app.controller('ctrl', function ($scope, $http) {
-    $http.get('/userService').success(function(data) {
-        $scope.user = data;
-    });
-    $http.get('/retrieve').success(function(data) {
-        $scope.domains = data;
-    });
+    var defaultServerError = function errorCallback(response) {
+        $scope.errorMessage = 'Oops! Something went wrong :-(';
+    };
+
+    $http.get('/userService').then(function successCallback(response) {
+        $scope.user = response.data;
+    }, defaultServerError);
+
     $scope.showOrHide = function(domain) {
         $scope.errorMessage = '';
         if (domain.shown) {
@@ -32,11 +35,11 @@ app.controller('ctrl', function ($scope, $http) {
             url: "/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "domain=" + $scope.newDomain + "&hex=" + hex
-        }).success(function(domain){
-            $scope.domains.push(domain);
+        }).then(function successCallback(response){
+            $scope.domains.push(response.data);
             $scope.newDomain = null;
             $scope.newPassword = null;
-        });
+        }, defaultServerError);
     };
     $scope.masterPasswordLogin = function () {
         if (!$scope.modelMasterPwd) {
@@ -44,12 +47,20 @@ app.controller('ctrl', function ($scope, $http) {
             return;
         }
         var localEncodedUserId = encode($scope.user.userId, $scope.modelMasterPwd, $scope.user.userId);
-        if ($scope.user.encodedUserId != localEncodedUserId) {
+        $http({
+            method: "post",
+            url: "/encodedUserId",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            data: "operation=check&encodedUserId=" + localEncodedUserId
+        }).then(function successCallback(response) {
+            $scope.errorMessage = '';
+            $scope.masterPassword=$scope.modelMasterPwd;
+            $http.get('/retrieve').then(function successCallback(response) {
+                $scope.domains = response.data;
+            }, defaultServerError);
+        }, function errorCallback(response) {
             $scope.errorMessage = 'Your Master Password is wrong!';
-            return;
-        }
-        $scope.errorMessage = '';
-        $scope.masterPassword=$scope.modelMasterPwd;
+        });
     };
     $scope.addEncodedUserId = function () {
         if (!$scope.newMasterPassword1) {
@@ -66,15 +77,15 @@ app.controller('ctrl', function ($scope, $http) {
             method: "post",
             url: "/encodedUserId",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "encodedUserId=" + hex
-        }).success(function(domain){
+            data: "operation=store&encodedUserId=" + hex
+        }).then(function successCallback(response){
             $scope.user.encodedUserId = hex;
             $scope.masterPassword=$scope.newMasterPassword1;
-        });
+        }, defaultServerError);
     };
     $scope.randomPassword = function() {
-        $http.get('/secureRandom').success(function(data) {
-            $scope.newPassword = data;
-        });
+        $http.get('/secureRandom').then(function successCallback(response) {
+            $scope.newPassword = response.data;
+        }, defaultServerError);
     }
 });
