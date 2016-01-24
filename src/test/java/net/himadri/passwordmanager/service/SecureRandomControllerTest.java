@@ -5,17 +5,17 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class SecureRandomServletTest {
+public class SecureRandomControllerTest {
 
-    private SecureRandomServlet underTest;
+    private SecureRandomController underTest;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new SecureRandomServlet();
+        underTest = new SecureRandomController();
     }
 
     @Test
     public void testSecureRandom() throws Exception {
-        assertEquals(SecureRandomServlet.COUNT, underTest.createSecureRandom().length());
+        assertEquals(SecureRandomController.COUNT, underTest.createSecureRandom().length());
     }
 }

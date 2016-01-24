@@ -5,7 +5,7 @@ app.controller('ctrl', function ($scope, $http) {
         $scope.errorMessage = 'Oops! Something went wrong :-(';
     };
 
-    $http.get('/userService').then(function successCallback(response) {
+    $http.get('/service/userService').then(function successCallback(response) {
         $scope.user = response.data;
     }, defaultServerError);
 
@@ -32,7 +32,7 @@ app.controller('ctrl', function ($scope, $http) {
         var hex = encode($scope.newPassword, $scope.masterPassword, $scope.user.userId);
         $http({
             method: "post",
-            url: "/store",
+            url: "/service/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "domain=" + $scope.newDomain + "&hex=" + hex
         }).then(function successCallback(response){
@@ -49,13 +49,13 @@ app.controller('ctrl', function ($scope, $http) {
         var localEncodedUserId = encode($scope.user.userId, $scope.modelMasterPwd, $scope.user.userId);
         $http({
             method: "post",
-            url: "/encodedUserId",
+            url: "/service/encodedUserId/check",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "operation=check&encodedUserId=" + localEncodedUserId
+            data: "encodedUserId=" + localEncodedUserId
         }).then(function successCallback(response) {
             $scope.errorMessage = '';
             $scope.masterPassword=$scope.modelMasterPwd;
-            $http.get('/retrieve').then(function successCallback(response) {
+            $http.get('/service/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
             }, defaultServerError);
         }, function errorCallback(response) {
@@ -75,16 +75,16 @@ app.controller('ctrl', function ($scope, $http) {
         var hex = encode($scope.user.userId, $scope.newMasterPassword1, $scope.user.userId);
         $http({
             method: "post",
-            url: "/encodedUserId",
+            url: "/service/encodedUserId/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "operation=store&encodedUserId=" + hex
+            data: "encodedUserId=" + hex
         }).then(function successCallback(response){
             $scope.user.encodedUserId = hex;
             $scope.masterPassword=$scope.newMasterPassword1;
         }, defaultServerError);
     };
     $scope.randomPassword = function() {
-        $http.get('/secureRandom').then(function successCallback(response) {
+        $http.get('/service/secureRandom').then(function successCallback(response) {
             $scope.newPassword = response.data;
         }, defaultServerError);
     }
