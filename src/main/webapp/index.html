@@ -55,8 +55,12 @@
             <button type="button" class="close" aria-label="Close" ng-click="errorMessage=''"><span aria-hidden="true">&times;</span></button>
             {{errorMessage}}
         </div>
-            <div class="jumbotron" ng-show="(masterPassword ? false : true)">
-                <h1>Welcome to Password Manager!</h1>
+        <div class="jumbotron" ng-show="(masterPassword ? false : true)">
+            <h1>Welcome to Password Manager!</h1>
+            <div ng-show="user ? false : true">
+                <p><img src="image/ajax-loader.gif" class="center-block"></p>
+            </div>
+            <div ng-show="user ? true : false">
                 <div ng-show="user.encodedUserId ? false : true">
                     <p>It seems your are a first time vistor of Password Manager!</p>
                     <p>In order to proceed, please create your Master Password</p>
@@ -76,6 +80,7 @@
                 It remains in secrecy in your browser's memory until you close this tab.<br>
                 <span class="label label-default">STANDARD</span>The app uses the industry standard <strong>AES cipher with 256 bit encryption</strong>.
             </div>
+        </div>
 
         <div class="panel panel-default" ng-show="masterPassword ? true : false">
             <div class="panel-heading">My Passwords</div>
