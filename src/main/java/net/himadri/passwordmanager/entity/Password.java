@@ -6,27 +6,26 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
 @Entity
-public class DataEntity {
+public class Password {
 
     @Id
-    private String id;
+    private Long id;
     @Index
     private String userId;
     @Index
     private String domain;
     private String hex;
 
-    public DataEntity() {
+    public Password() {
     }
 
-    public DataEntity(String userId, String domain, String hex) {
-        this.id = userId + domain;
+    public Password(String userId, String domain, String hex) {
         this.userId = userId;
         this.domain = domain;
         this.hex = hex;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

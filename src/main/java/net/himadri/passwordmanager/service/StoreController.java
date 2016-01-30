@@ -1,7 +1,7 @@
 package net.himadri.passwordmanager.service;
 
 import com.google.appengine.api.users.UserServiceFactory;
-import net.himadri.passwordmanager.entity.DataEntity;
+import net.himadri.passwordmanager.entity.Password;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,12 +12,12 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 public class StoreController {
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
-    public DataEntity store(@RequestParam String domain, @RequestParam String hex)  {
+    public Password store(@RequestParam String domain, @RequestParam String hex)  {
         if(StringUtils.isEmpty(domain) || StringUtils.isEmpty(hex)) {
             throw new IllegalArgumentException();
         }
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        DataEntity dataEntity = new DataEntity(userId, domain, hex);
+        Password dataEntity = new Password(userId, domain, hex);
         ofy().save().entities(dataEntity).now();
         return dataEntity;
     }
