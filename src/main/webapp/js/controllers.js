@@ -15,24 +15,30 @@ app.controller('ctrl', function ($scope, $http) {
 
     $scope.showOrHidePassword = function(domain) {
         $scope.errorMessage = '';
-        if (domain.shownPassword) {
-            domain.shownPassword = false;
-            domain.decodedPassword = '';
-        } else {
+        var thisShown = domain.shownPassword;
+        for (i in $scope.domains) {
+            $scope.domains[i].shownPassword = false;
+            $scope.domains[i].decodedPassword = '';
+        }
+        if (!thisShown) {
             domain.shownPassword = true;
             domain.decodedPassword = decode(domain.hex, $scope.masterPassword, $scope.user.userId);
         }
     };
     $scope.addPassword = function () {
+        $scope.errorMessage = '';
+        $scope.newDomainClass = '';
+        $scope.newPasswordClass = '';
         if (!$scope.newDomain) {
             $scope.errorMessage = 'Please provide your New Domain!';
+            $scope.newDomainClass = 'has-error';
             return;
         }
         if (!$scope.newPassword) {
             $scope.errorMessage = 'Please provide your New Password!';
+            $scope.newPasswordClass = 'has-error';
             return;
         }
-        $scope.errorMessage = '';
         var hex = encode($scope.newPassword, $scope.masterPassword, $scope.user.userId);
         $http({
             method: "post",
@@ -136,5 +142,19 @@ app.controller('ctrl', function ($scope, $http) {
             domain.decodedPassword = beforeUpdate;
         });
         return true;
+    };
+    $scope.prepareDeleteDomain = function(domain) {
+        $scope.domainToBeDeleted = domain;
+    };
+    $scope.deleteDomain = function() {
+        $http({
+            method: "post",
+            url: "/service/deletePassword",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            data: "id=" + $scope.domainToBeDeleted.id
+        }).then(function successCallback(response){
+            var index = $scope.domains.indexOf($scope.domainToBeDeleted);
+            $scope.domains.splice(index, 1);
+        }, defaultServerError);
     };
 });
