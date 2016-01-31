@@ -1,4 +1,8 @@
-var app=angular.module('app', []);
+var app=angular.module('app', ["xeditable"]);
+
+app.run(function(editableOptions) {
+    editableOptions.theme = 'bs3';
+});
 
 app.controller('ctrl', function ($scope, $http) {
     var defaultServerError = function errorCallback(response) {
@@ -9,13 +13,13 @@ app.controller('ctrl', function ($scope, $http) {
         $scope.user = response.data;
     }, defaultServerError);
 
-    $scope.showOrHide = function(domain) {
+    $scope.showOrHidePassword = function(domain) {
         $scope.errorMessage = '';
-        if (domain.shown) {
-            domain.shown = false;
+        if (domain.shownPassword) {
+            domain.shownPassword = false;
             domain.decodedPassword = '';
         } else {
-            domain.shown = true;
+            domain.shownPassword = true;
             domain.decodedPassword = decode(domain.hex, $scope.masterPassword, $scope.user.userId);
         }
     };
@@ -87,5 +91,50 @@ app.controller('ctrl', function ($scope, $http) {
         $http.get('/service/secureRandom').then(function successCallback(response) {
             $scope.newPassword = response.data;
         }, defaultServerError);
-    }
+    };
+    $scope.updateDomain = function(domain, data) {
+        if (!data) {
+            return false;
+        }
+        var beforeUpdate = domain.domain;
+        $http({
+            method: "post",
+            url: "/service/changeDomain",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            data: "id=" + domain.id + "&domain=" + data
+        }).then(function successCallback(response){
+        }, function errorCallback(response) {
+            $scope.errorMessage = 'Oops! Something went wrong :-(';
+            domain.domain = beforeUpdate;
+        });
+        return true;
+    };
+    $scope.hoverOverDomain = function(domain) {
+        domain.showDomainEditButton = true;
+    };
+    $scope.leaveHoverOverDomain = function(domain) {
+        domain.showDomainEditButton = false;
+    };
+    $scope.hoverOrLeaveOverDomain = function(domain) {
+        domain.showDomainEditButton = !domain.showDomainEditButton;
+    };
+    $scope.updatePassword = function(domain, data) {
+        if (!data) {
+            return false;
+        }
+        var beforeUpdate = domain.decodedPassword;
+        var hex = encode(data, $scope.masterPassword, $scope.user.userId);
+        $http({
+            method: "post",
+            url: "/service/changeHex",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            data: "id=" + domain.id + "&hex=" + hex
+        }).then(function successCallback(response){
+            domain.hex = hex;
+        }, function errorCallback(response) {
+            $scope.errorMessage = 'Oops! Something went wrong :-(';
+            domain.decodedPassword = beforeUpdate;
+        });
+        return true;
+    };
 });

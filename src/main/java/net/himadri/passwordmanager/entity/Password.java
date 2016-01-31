@@ -37,6 +37,14 @@ public class Password {
         return domain;
     }
 
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public void setHex(String hex) {
+        this.hex = hex;
+    }
+
     public String getHex() {
         return hex;
     }

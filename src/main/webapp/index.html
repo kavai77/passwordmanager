@@ -6,7 +6,8 @@
     <title>Password Manager</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="css/bootstrap-editable.css" rel="stylesheet"/>
+    <link href="css/xeditable.css" rel="stylesheet"/>
     <link href="css/main.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -22,6 +23,8 @@
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/cipher.js"></script>
     <script type="text/javascript" src="js/controllers.js"></script>
+    <script type="text/javascript" src="js/bootstrap-editable.min.js"></script>
+    <script type="text/javascript" src="js/xeditable.min.js"></script>
 
 </head>
 <body ng-controller="ctrl">
@@ -61,18 +64,24 @@
                 <p><img src="image/ajax-loader.gif" class="center-block"></p>
             </div>
             <div ng-show="user ? true : false">
-                <div ng-show="user.encodedUserId ? false : true">
-                    <p>It seems your are a first time vistor of Password Manager!</p>
-                    <p>In order to proceed, please create your Master Password</p>
+                <form class="form-group" ng-show="user.encodedUserId ? false : true" ng-submit="addEncodedUserId()"
+                      autocomplete="off">
+                    <p class="lead">It seems your are a first time visitor of Password Manager!</p>
+                    <p class="lead">In order to proceed, please create your Master Password</p>
                     <p><input class="form-control" ng-model="newMasterPassword1" type="password" placeholder="Master Password"/></p>
                     <p><input class="form-control" ng-model="newMasterPassword2" type="password" placeholder="Type again"/></p>
-                    <p><button type="button" class="btn btn-primary btn-lg" role="button" ng-click="addEncodedUserId()">Create</button></p>
-                </div>
-                <div ng-show="user.encodedUserId ? true : false">
-                    <p>In order to proceed, please provide your Master Password</p>
-                    <p><input class="form-control" ng-model="modelMasterPwd" type="password" placeholder="Master Password"/></p>
-                    <p><button type="button" class="btn btn-primary btn-lg" role="button" ng-click="masterPasswordLogin()">Proceed</button></p>
-                </div>
+                    <p><button type="submit" class="btn btn-primary btn-lg">Create</button></p>
+                </form>
+                <form class="form-group" ng-show="user.encodedUserId ? true : false" ng-submit="masterPasswordLogin()"
+                      autocomplete="off">
+                    <p class="lead">In order to proceed, please provide your Master Password</p>
+                    <p>
+                        <label for="modelMasterPwdInput" class="sr-only">Master Password</label>
+                        <input id="modelMasterPwdInput" class="form-control" ng-model="modelMasterPwd" type="password"
+                               placeholder="Master Password" autofocus/>
+                    </p>
+                    <p><button type="submit" class="btn btn-primary btn-lg">Proceed</button></p>
+                </form>
                 <span class="label label-default">SECURITY</span>The cipher algorithm uses the master password to encrypt and decrypt your passwords.
                 The server stores only your encrypted passwords which are <strong>impossible to decrypt without your master password</strong>.
                 <br>
@@ -86,7 +95,7 @@
             <div class="panel-heading">My Passwords</div>
             <div class="panel-body">
                 <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain"/>
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Domain</th>
@@ -95,15 +104,59 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="domain in domains | filter: tablefilter">
-                            <td>{{domain.domain}}</td>
-                            <td>{{domain.shown ? domain.decodedPassword : '*******'}}</td>
-                            <td><button type="button" class="btn btn-info" ng-click="showOrHide(domain)">{{domain.shown ? 'Hide' : 'Show'}}</button></td>
+                            <td ng-mouseover="hoverOverDomain(domain)" ng-mouseout="leaveHoverOverDomain(domain)">
+                                <span editable-text="domain.domain" e-form="domainBtnForm"
+                                      onbeforesave="updateDomain(domain, $data)"
+                                      ng-click="hoverOrLeaveOverDomain(domain)">
+                                    {{domain.domain}}
+                                </span>
+                                <button class="btn btn-default" ng-click="domainBtnForm.$show()"
+                                        ng-show="domain.showDomainEditButton && !domainBtnForm.$visible">
+                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                </button>
+                            </td>
+                            <td>
+                                <span ng-show="!domain.shownPassword">*******</span>
+                                <span ng-show="domain.shownPassword"
+                                      editable-text="domain.decodedPassword" e-form="passwordBtnForm"
+                                      onbeforesave="updatePassword(domain, $data)">
+                                    {{domain.decodedPassword}}
+                                </span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-info"
+                                        ng-click="showOrHidePassword(domain)" ng-disabled="passwordBtnForm.$visible">
+                                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true" ng-show="!domain.shownPassword"></span>
+                                    <span class="glyphicon glyphicon-eye-close" aria-hidden="true" ng-show="domain.shownPassword"></span>
+                                </button>
+                                <button class="btn btn-info" ng-click="passwordBtnForm.$show()"
+                                        ng-show="domain.shownPassword && !passwordBtnForm.$visible">
+                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                </button>
+                            </td>
                         </tr>
                         <tr>
-                            <td><input class="form-control" ng-model="newDomain"  placeholder="New Domain"/></td>
-                            <td><input class="form-control" ng-model="newPassword" placeholder="New Password"/></td>
-                            <td><button type="button" class="btn btn-info" ng-click="randomPassword()">Generate Password</button>
-                            <button type="button" class="btn btn-primary" ng-click="addPassword()">Add</button></td>
+                            <td>
+                                <div class="form-group">
+                                    <label for="newDomainInput" class="sr-only">New Domain</label>
+                                    <input id="newDomainInput" class="form-control" ng-model="newDomain" placeholder="New Domain"/>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <p><label for="newPasswordInput" class="sr-only">New Password</label>
+                                    <input id="newPasswordInput" class="form-control" ng-model="newPassword" placeholder="New Password"/></p>
+                                    <p><button type="button" class="btn btn-info" ng-click="randomPassword()">
+                                        <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+                                        Generate Password
+                                    </button></p>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-success" ng-click="addPassword()">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
