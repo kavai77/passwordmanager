@@ -9,6 +9,8 @@ app.controller('ctrl', function ($scope, $http) {
         $scope.errorMessage = 'Oops! Something went wrong :-(';
     };
 
+    $scope.copySupported = document.queryCommandSupported('copy');
+
     $http.get('/service/userService').then(function successCallback(response) {
         $scope.user = response.data;
     }, defaultServerError);
