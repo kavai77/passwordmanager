@@ -14,7 +14,7 @@ app.controller('ctrl', function ($scope, $http) {
     }, defaultServerError);
 
     $scope.showOrHidePassword = function(domain) {
-        $scope.errorMessage = '';
+        $scope.clearMessages();
         var thisShown = domain.shownPassword;
         for (i in $scope.domains) {
             $scope.domains[i].shownPassword = false;
@@ -25,8 +25,18 @@ app.controller('ctrl', function ($scope, $http) {
             domain.decodedPassword = decode(domain.hex, $scope.masterPassword, $scope.user.userId);
         }
     };
+    $scope.copyPassword = function(domain) {
+        $scope.clearMessages();
+        var decodedPwd = decode(domain.hex, $scope.masterPassword, $scope.user.userId);
+        var successful = copyTextToClipboard(decodedPwd);
+        if (successful) {
+            $scope.successMessage = 'Password copied.'
+        } else {
+            $scope.errorMessage = 'Oops! Unable to copy. Make the password visible and copy it manually :-('
+        }
+    };
     $scope.addPassword = function () {
-        $scope.errorMessage = '';
+        $scope.clearMessages();
         $scope.newDomainClass = '';
         $scope.newPasswordClass = '';
         if (!$scope.newDomain) {
@@ -63,7 +73,7 @@ app.controller('ctrl', function ($scope, $http) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "encodedUserId=" + localEncodedUserId
         }).then(function successCallback(response) {
-            $scope.errorMessage = '';
+            $scope.clearMessages();
             $scope.masterPassword=$scope.modelMasterPwd;
             $http.get('/service/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
@@ -81,7 +91,7 @@ app.controller('ctrl', function ($scope, $http) {
             $scope.errorMessage = 'The two passwords are not the same!';
             return;
         }
-        $scope.errorMessage = '';
+        $scope.clearMessages();
         var hex = encode($scope.user.userId, $scope.newMasterPassword1, $scope.user.userId);
         $http({
             method: "post",
@@ -94,6 +104,7 @@ app.controller('ctrl', function ($scope, $http) {
         }, defaultServerError);
     };
     $scope.randomPassword = function() {
+        $scope.clearMessages();
         $http.get('/service/secureRandom').then(function successCallback(response) {
             $scope.newPassword = response.data;
         }, defaultServerError);
@@ -156,5 +167,9 @@ app.controller('ctrl', function ($scope, $http) {
             var index = $scope.domains.indexOf($scope.domainToBeDeleted);
             $scope.domains.splice(index, 1);
         }, defaultServerError);
+    };
+    $scope.clearMessages = function() {
+        $scope.errorMessage = null;
+        $scope.successMessage = null;
     };
 });
