@@ -4,7 +4,9 @@ app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
 });
 
-app.controller('ctrl', function ($scope, $http) {
+app.controller('ctrl', function ($scope, $http, $timeout) {
+    var timeLockInMillis = 300000; // 5 minutes
+
     var defaultServerError = function errorCallback(response) {
         $scope.errorMessage = 'Oops! Something went wrong :-(';
     };
@@ -80,6 +82,9 @@ app.controller('ctrl', function ($scope, $http) {
             $http.get('/service/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
             }, defaultServerError);
+            $timeout(function() {
+                $scope.masterPassword=null;
+            }, timeLockInMillis); // 5 minutes
         }, function errorCallback(response) {
             $scope.errorMessage = 'Your Master Password is wrong!';
         });
