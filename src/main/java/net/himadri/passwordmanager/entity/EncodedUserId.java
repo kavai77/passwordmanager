@@ -7,15 +7,15 @@ import com.googlecode.objectify.annotation.Id;
 public class EncodedUserId {
     @Id
     private String userId;
-    private String encoded;
+    private String masterPasswordMd5Hash;
     private String email;
 
     public EncodedUserId() {
     }
 
-    public EncodedUserId(String userId, String encoded, String email) {
+    public EncodedUserId(String userId, String masterPasswordMd5Hash, String email) {
         this.userId = userId;
-        this.encoded = encoded;
+        this.masterPasswordMd5Hash = masterPasswordMd5Hash;
         this.email = email;
     }
 
@@ -23,11 +23,15 @@ public class EncodedUserId {
         return userId;
     }
 
-    public String getEncoded() {
-        return encoded;
-    }
-
     public String getEmail() {
         return email;
+    }
+
+    public String getMasterPasswordMd5Hash() {
+        return masterPasswordMd5Hash;
+    }
+
+    public void setMasterPasswordMd5Hash(String masterPasswordMd5Hash) {
+        this.masterPasswordMd5Hash = masterPasswordMd5Hash;
     }
 }

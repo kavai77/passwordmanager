@@ -70,12 +70,12 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             $scope.errorMessage = 'Please provide your Master Password!';
             return;
         }
-        var localEncodedUserId = encode($scope.user.userId, $scope.modelMasterPwd, $scope.user.userId);
+        var md5Hash = md5($scope.modelMasterPwd);
         $http({
             method: "post",
             url: "/service/encodedUserId/check",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "encodedUserId=" + localEncodedUserId
+            data: "md5Hash=" + md5Hash
         }).then(function successCallback(response) {
             $scope.clearMessages();
             $scope.masterPassword=$scope.modelMasterPwd;
@@ -99,12 +99,12 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             return;
         }
         $scope.clearMessages();
-        var hex = encode($scope.user.userId, $scope.newMasterPassword1, $scope.user.userId);
+        var hex = md5($scope.newMasterPassword1);
         $http({
             method: "post",
             url: "/service/encodedUserId/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "encodedUserId=" + hex
+            data: "md5Hash=" + hex
         }).then(function successCallback(response){
             $scope.user.encodedUserId = hex;
             $scope.masterPassword=$scope.newMasterPassword1;

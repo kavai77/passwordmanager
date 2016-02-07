@@ -19,3 +19,9 @@ function decode(encodedHex, password, salt) {
     decipher.finish();
     return decipher.output.data;
 }
+
+function md5(text) {
+    var md = forge.md.md5.create();
+    md.update('The quick brown fox jumps over the lazy dog');
+    return md.digest().toHex();
+}
