@@ -14,11 +14,12 @@ import static org.springframework.util.Assert.*;
 public class StoreController {
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
-    public Password store(@RequestParam String domain, @RequestParam String hex)  {
+    public Password store(@RequestParam String domain, @RequestParam String hex, @RequestParam String iv)  {
         hasLength(domain);
         hasLength(hex);
+        hasLength(iv);
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        Password dataEntity = new Password(userId, domain, hex);
+        Password dataEntity = new Password(userId, domain, hex, iv);
         ofy().save().entity(dataEntity).now();
         return dataEntity;
     }
@@ -34,11 +35,12 @@ public class StoreController {
     }
 
     @RequestMapping(value = "/changeHex", method = RequestMethod.POST)
-    public Password changeHex(@RequestParam Long id, @RequestParam String hex)  {
+    public Password changeHex(@RequestParam Long id, @RequestParam String hex, @RequestParam String iv)  {
         hasLength(hex);
         notNull(id);
         Password password = getSafePassword(id);
         password.setHex(hex);
+        password.setIv(iv);
         ofy().save().entity(password).now();
         return password;
     }

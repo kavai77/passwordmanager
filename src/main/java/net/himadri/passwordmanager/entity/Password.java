@@ -15,14 +15,16 @@ public class Password {
     @Index
     private String domain;
     private String hex;
+    private String iv;
 
     public Password() {
     }
 
-    public Password(String userId, String domain, String hex) {
+    public Password(String userId, String domain, String hex, String iv) {
         this.userId = userId;
         this.domain = domain;
         this.hex = hex;
+        this.iv = iv;
     }
 
     public Long getId() {
@@ -47,5 +49,13 @@ public class Password {
 
     public String getHex() {
         return hex;
+    }
+
+    public String getIv() {
+        return iv;
+    }
+
+    public void setIv(String iv) {
+        this.iv = iv;
     }
 }

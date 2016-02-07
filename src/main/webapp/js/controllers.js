@@ -26,12 +26,14 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         }
         if (!thisShown) {
             domain.shownPassword = true;
-            domain.decodedPassword = decode(domain.hex, $scope.masterPassword, $scope.user.userId);
+            var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
+            domain.decodedPassword = decode(domain.hex, $scope.masterPassword, $scope.user.userId, iv);
         }
     };
     $scope.copyPassword = function(domain) {
         $scope.clearMessages();
-        var decodedPwd = decode(domain.hex, $scope.masterPassword, $scope.user.userId);
+        var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
+        var decodedPwd = decode(domain.hex, $scope.masterPassword, $scope.user.userId, iv);
         var successful = copyTextToClipboard(decodedPwd);
         if (successful) {
             $scope.successMessage = 'Password copied.'
@@ -53,12 +55,13 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             $scope.newPasswordClass = 'has-error';
             return;
         }
-        var hex = encode($scope.newPassword, $scope.masterPassword, $scope.user.userId);
+        var iv = forge.random.getBytesSync(16);
+        var hex = encode($scope.newPassword, $scope.masterPassword, $scope.user.userId, iv);
         $http({
             method: "post",
             url: "/service/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "domain=" + $scope.newDomain + "&hex=" + hex
+            data: "domain=" + $scope.newDomain + "&hex=" + hex + "&iv=" + forge.util.bytesToHex(iv)
         }).then(function successCallback(response){
             $scope.domains.push(response.data);
             $scope.newDomain = null;
@@ -147,14 +150,16 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             return false;
         }
         var beforeUpdate = domain.decodedPassword;
-        var hex = encode(data, $scope.masterPassword, $scope.user.userId);
+        var iv = forge.random.getBytesSync(16);
+        var hex = encode(data, $scope.masterPassword, $scope.user.userId, iv);
         $http({
             method: "post",
             url: "/service/changeHex",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "id=" + domain.id + "&hex=" + hex
+            data: "id=" + domain.id + "&hex=" + hex + "&iv=" + forge.util.bytesToHex(iv)
         }).then(function successCallback(response){
             domain.hex = hex;
+            domain.iv = forge.util.bytesToHex(iv);
         }, function errorCallback(response) {
             $scope.errorMessage = 'Oops! Something went wrong :-(';
             domain.decodedPassword = beforeUpdate;
