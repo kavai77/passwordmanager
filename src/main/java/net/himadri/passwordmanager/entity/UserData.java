@@ -4,20 +4,18 @@ package net.himadri.passwordmanager.entity;
 * Created by Kávai on 2016.01.24..
 */
 public class UserData {
-    public static final int DEFAULT_ITERATIONS = 10000;
-
     private final String userId;
     private final String nickName;
     private final String logoutURL;
     private final boolean encodedUserId;
-    private int defaultIterations;
+    private int iterations;
 
-    public UserData(String userId, String nickName, String logoutURL, boolean encodedUserId) {
+    public UserData(String userId, String nickName, String logoutURL, boolean encodedUserId, int iterations) {
         this.userId = userId;
         this.nickName = nickName;
         this.logoutURL = logoutURL;
         this.encodedUserId = encodedUserId;
-        this.defaultIterations = DEFAULT_ITERATIONS;
+        this.iterations = iterations;
     }
 
     public String getUserId() {
@@ -36,7 +34,7 @@ public class UserData {
         return encodedUserId;
     }
 
-    public int getDefaultIterations() {
-        return defaultIterations;
+    public int getIterations() {
+        return iterations;
     }
 }

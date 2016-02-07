@@ -63,7 +63,7 @@
             <button type="button" class="close" aria-label="Close" ng-click="successMessage=''"><span aria-hidden="true">&times;</span></button>
             {{successMessage}}
         </div>
-        <div class="jumbotron" ng-show="(masterPassword ? false : true)">
+        <div class="jumbotron" ng-show="(masterKey ? false : true)">
             <h1>Welcome to Password Manager!</h1>
             <div ng-show="user ? false : true">
                 <p><img src="image/ajax-loader.gif" class="center-block"></p>
@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        <div class="panel panel-default" ng-show="masterPassword ? true : false">
+        <div class="panel panel-default" ng-show="masterKey ? true : false">
             <div class="panel-heading">My Passwords</div>
             <div class="panel-body">
                 <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain"/>

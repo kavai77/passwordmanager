@@ -4,7 +4,6 @@ package net.himadri.passwordmanager.entity;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.OnLoad;
 
 @Entity
 public class Password {
@@ -17,24 +16,15 @@ public class Password {
     private String domain;
     private String hex;
     private String iv;
-    private int iterations;
 
     public Password() {
     }
 
-    public Password(String userId, String domain, String hex, String iv, int iterations) {
+    public Password(String userId, String domain, String hex, String iv) {
         this.userId = userId;
         this.domain = domain;
         this.hex = hex;
         this.iv = iv;
-        this.iterations = iterations;
-    }
-
-    @OnLoad
-    void onLoad() {
-        if (iterations == 0) {
-            iterations = 16; // the default value in legacy javascript
-        }
     }
 
     public Long getId() {
@@ -67,13 +57,5 @@ public class Password {
 
     public void setIv(String iv) {
         this.iv = iv;
-    }
-
-    public int getIterations() {
-        return iterations;
-    }
-
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
     }
 }

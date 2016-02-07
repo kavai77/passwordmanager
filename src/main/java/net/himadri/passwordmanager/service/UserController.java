@@ -22,7 +22,9 @@ public class UserController{
         User user = userService.getCurrentUser();
         ofy().save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
         EncodedUserId encodedUserId = ofy().load().type(EncodedUserId.class).id(user.getUserId()).now();
-        return new UserData(user.getUserId(), user.getNickname(), userService.createLogoutURL("/index.html"), encodedUserId != null);
+        int iterations = encodedUserId != null ? encodedUserId.getIterations() : EncodedUserId.DEFAULT_ITERATIONS;
+        return new UserData(user.getUserId(), user.getNickname(), userService.createLogoutURL("/index.html"),
+                encodedUserId != null, iterations);
     }
 
 }
