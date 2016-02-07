@@ -1,5 +1,5 @@
-function encode(text, password, salt, iv) {
-    var key = forge.pkcs5.pbkdf2(password, salt, 16, 32);
+function encode(text, password, salt, iv, iterations) {
+    var key = forge.pkcs5.pbkdf2(password, salt, iterations, 32);
     var cipher = forge.cipher.createCipher('AES-CBC', key);
     cipher.start({iv: iv});
     cipher.update(forge.util.createBuffer(text));
@@ -8,8 +8,8 @@ function encode(text, password, salt, iv) {
     return encrypted.toHex();
 }
 
-function decode(encodedHex, password, salt, iv) {
-    var key = forge.pkcs5.pbkdf2(password, salt, 16, 32);
+function decode(encodedHex, password, salt, iv, iterations) {
+    var key = forge.pkcs5.pbkdf2(password, salt, iterations, 32);
     var decipher = forge.cipher.createDecipher('AES-CBC', key);
     decipher.start({iv: iv});
     var e = forge.util.createBuffer(forge.util.hexToBytes(encodedHex));

@@ -14,12 +14,13 @@ import static org.springframework.util.Assert.*;
 public class StoreController {
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
-    public Password store(@RequestParam String domain, @RequestParam String hex, @RequestParam String iv)  {
+    public Password store(@RequestParam String domain, @RequestParam String hex, @RequestParam String iv,
+                          @RequestParam int iterations)  {
         hasLength(domain);
         hasLength(hex);
         hasLength(iv);
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        Password dataEntity = new Password(userId, domain, hex, iv);
+        Password dataEntity = new Password(userId, domain, hex, iv, iterations);
         ofy().save().entity(dataEntity).now();
         return dataEntity;
     }
@@ -28,19 +29,21 @@ public class StoreController {
     public Password changeDomain(@RequestParam Long id, @RequestParam String domain)  {
         hasLength(domain);
         notNull(id);
-        Password password = getSafePassword(id);
+        Password password = getUserPassword(id);
         password.setDomain(domain);
         ofy().save().entity(password).now();
         return password;
     }
 
     @RequestMapping(value = "/changeHex", method = RequestMethod.POST)
-    public Password changeHex(@RequestParam Long id, @RequestParam String hex, @RequestParam String iv)  {
+    public Password changeHex(@RequestParam Long id, @RequestParam String hex, @RequestParam String iv,
+                              @RequestParam int iterations)  {
         hasLength(hex);
         notNull(id);
-        Password password = getSafePassword(id);
+        Password password = getUserPassword(id);
         password.setHex(hex);
         password.setIv(iv);
+        password.setIterations(iterations);
         ofy().save().entity(password).now();
         return password;
     }
@@ -48,7 +51,7 @@ public class StoreController {
     @RequestMapping(value = "/deletePassword", method = RequestMethod.POST)
     public void deletePassword(@RequestParam Long id) {
         notNull(id);
-        Password password = getSafePassword(id);
+        Password password = getUserPassword(id);
         ofy().delete().entity(password).now();
     }
 
@@ -70,7 +73,7 @@ public class StoreController {
         // nothing to do
     }
 
-    private Password getSafePassword(Long id) {
+    private Password getUserPassword(Long id) {
         Password password = ofy().load().type(Password.class).id(id).safe();
         isTrue(StringUtils.equals(password.getUserId(), UserServiceFactory.getUserService().getCurrentUser().getUserId()));
         return password;
