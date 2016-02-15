@@ -119,9 +119,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
     $scope.randomPassword = function() {
         $scope.clearMessages();
         $http.get('/service/secureRandom').then(function successCallback(response) {
-            console.log("RAW Password: " + response.data);
             $scope.newPassword = $scope.jsRandomPasswordEnhancer(response.data);
-            console.log("Enhanced Password: " + $scope.newPassword);
         }, defaultServerError);
     };
     $scope.jsRandomPasswordEnhancer = function(password) {
