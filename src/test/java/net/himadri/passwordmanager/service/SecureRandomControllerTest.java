@@ -1,5 +1,6 @@
 package net.himadri.passwordmanager.service;
 
+import net.himadri.passwordmanager.entity.Settings;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,6 +17,6 @@ public class SecureRandomControllerTest {
 
     @Test
     public void testSecureRandom() throws Exception {
-        assertEquals(SecureRandomController.COUNT, underTest.createSecureRandom().length());
+        assertEquals(Settings.PASSWORD_LENGTH, underTest.createSecureRandom().length());
     }
 }

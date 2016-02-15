@@ -7,7 +7,6 @@ import com.googlecode.objectify.annotation.OnLoad;
 
 @Entity
 public class EncodedUserId {
-    public static final int DEFAULT_ITERATIONS = 100000;
 
     @Id
     private String userId;

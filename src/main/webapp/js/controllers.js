@@ -119,8 +119,21 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
     $scope.randomPassword = function() {
         $scope.clearMessages();
         $http.get('/service/secureRandom').then(function successCallback(response) {
-            $scope.newPassword = response.data;
+            console.log("RAW Password: " + response.data);
+            $scope.newPassword = $scope.jsRandomPasswordEnhancer(response.data);
+            console.log("Enhanced Password: " + $scope.newPassword);
         }, defaultServerError);
+    };
+    $scope.jsRandomPasswordEnhancer = function(password) {
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for( var i = 0; i < 7; i++ ) {
+            var char = possible.charAt(Math.floor(Math.random() * possible.length));
+            var index = Math.floor(Math.random() * password.length);
+            password = password.slice(0, index) + char + password.slice(index);
+        }
+
+        return password;
     };
     $scope.updateDomain = function(domain, data) {
         if (!data) {
