@@ -13,9 +13,18 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
 
     $scope.copySupported = document.queryCommandSupported('copy');
 
-    $http.get('/service/userService').then(function successCallback(response) {
-        $scope.user = response.data;
-    }, defaultServerError);
+    $scope.isActive = function (viewLocation) {
+        return viewLocation === window.location.pathname;
+    };
+
+    $scope.login = function(onSuccess) {
+        $http.get('/service/userService').then(function successCallback(response) {
+            $scope.user = response.data;
+            if (onSuccess != null) onSuccess();
+        }, defaultServerError);
+    };
+
+    $scope.login(null);
 
     $scope.showOrHidePassword = function(domain) {
         $scope.clearMessages();
@@ -35,9 +44,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
         var decodedPwd = decode(domain.hex, $scope.masterKey, iv);
         var successful = copyTextToClipboard(decodedPwd);
-        if (successful) {
-            $scope.successMessage = 'Password copied.'
-        } else {
+        if (!successful) {
             $scope.errorMessage = 'Oops! Unable to copy. Make the password visible and copy it manually :-('
         }
     };
@@ -110,10 +117,10 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "md5Hash=" + hex
         }).then(function successCallback(response){
-            $scope.user.encodedUserId = true;
-            $scope.masterPassword = $scope.newMasterPassword1;
+            $scope.modelMasterPwd = $scope.newMasterPassword1;
             $scope.newMasterPassword1 = null;
             $scope.newMasterPassword2 = null;
+            $scope.login($scope.masterPasswordLogin);
         }, defaultServerError);
     };
     $scope.randomPassword = function() {

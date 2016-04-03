@@ -27,4 +27,9 @@ public class RetrieveController {
         return passwords;
     }
 
+    public int getPasswordCount() {
+        String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
+        return ofy().load().type(Password.class).filter("userId", userId).count();
+    }
+
 }

@@ -17,10 +17,11 @@ public class EncodedUserId {
     public EncodedUserId() {
     }
 
-    public EncodedUserId(String userId, String masterPasswordMd5Hash, String email) {
+    public EncodedUserId(String userId, String masterPasswordMd5Hash, String email, int iterations) {
         this.userId = userId;
         this.masterPasswordMd5Hash = masterPasswordMd5Hash;
         this.email = email;
+        this.iterations = iterations;
     }
 
     @OnLoad

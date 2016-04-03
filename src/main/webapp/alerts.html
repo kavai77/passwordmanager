@@ -1,0 +1,8 @@
+<div class="alert alert-danger" role="alert" ng-show="errorMessage ? true : false">
+    <button type="button" class="close" aria-label="Close" ng-click="errorMessage=''"><span aria-hidden="true">&times;</span></button>
+    {{errorMessage}}
+</div>
+<div class="alert alert-success" role="alert" ng-show="successMessage ? true : false">
+    <button type="button" class="close" aria-label="Close" ng-click="successMessage=''"><span aria-hidden="true">&times;</span></button>
+    {{successMessage}}
+</div>

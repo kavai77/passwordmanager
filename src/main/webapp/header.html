@@ -1,0 +1,24 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li ng-class="{ active: isActive('/')}"><a class="navbar-brand" href="/"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span> Password Manager</a></li>
+                <li ng-class="{ active: isActive('/password-change.html')}"><a href="/password-change.html"><span class="glyphicon glyphicon-retweet" aria-hidden="true"></span> Change Password</a></li>
+                <!--<li ng-class="{ active: isActive('/#tech')}"><a href="index.html/#tech">Technology</a></li>-->
+                <li><a href="https://www.linkedin.com/in/csaba-kavai-4b8a4548" target="_blank"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> Meet Author</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><p class="navbar-text"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{user.nickName}}</p></li>
+                <li><a href="{{user.logoutURL}}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
