@@ -8,11 +8,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static com.googlecode.objectify.ObjectifyService.ofy;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
 @RestController
 public class EncodedUserIdController {
+    private static final Logger LOG = Logger.getLogger(EncodedUserIdController.class.getName());
 
     @RequestMapping(value = "/encodedUserId/store", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
@@ -36,17 +40,21 @@ public class EncodedUserIdController {
         return Settings.DEFAULT_ITERATIONS;
     }
 
+    public EncodedUserId getEncodedUserId() {
+        User currentUser = UserServiceFactory.getUserService().getCurrentUser();
+        return ofy().load().type(EncodedUserId.class).id(currentUser.getUserId()).safe();
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleIllegalArgumentException(Exception e) {
-        // nothing to do
+        LOG.log(Level.SEVERE, "BAD_REQUEST", e);
     }
 
     @ExceptionHandler(NotAuthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleNotAuthorizedException(Exception e) {
-        // nothing to do
+        LOG.log(Level.SEVERE, "UNAUTHORIZED", e);
     }
 
     private class NotAuthorizedException extends RuntimeException {
