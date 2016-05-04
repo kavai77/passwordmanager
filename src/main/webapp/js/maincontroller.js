@@ -115,7 +115,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             method: "post",
             url: "/service/encodedUserId/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "md5Hash=" + hex
+            data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations
         }).then(function successCallback(response){
             $scope.modelMasterPwd = $scope.newMasterPassword1;
             $scope.newMasterPassword1 = null;
