@@ -24,16 +24,12 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         }, defaultServerError);
     };
 
-    $scope.login = function() {
-        $http.get('/service/public/authenticate').then(function successCallback(response) {
-            $scope.auth = response.data;
-            if ($scope.auth.authenticated) {
-                $scope.getUser(null);
-            }
-        }, defaultServerError);
-    };
-
-    $scope.login();
+    $http.post('/service/public/authenticate').then(function successCallback(response) {
+        $scope.auth = response.data;
+        if ($scope.auth.authenticated) {
+            $scope.getUser(null);
+        }
+    }, defaultServerError);
 
     $scope.showOrHidePassword = function(domain) {
         $scope.clearMessages();
