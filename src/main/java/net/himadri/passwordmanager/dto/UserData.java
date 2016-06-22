@@ -1,4 +1,4 @@
-package net.himadri.passwordmanager.entity;
+package net.himadri.passwordmanager.dto;
 
 /**
 * Created by Kávai on 2016.01.24..

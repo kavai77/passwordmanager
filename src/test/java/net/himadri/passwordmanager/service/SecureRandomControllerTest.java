@@ -8,11 +8,11 @@ import static org.junit.Assert.assertEquals;
 
 public class SecureRandomControllerTest {
 
-    private SecureRandomController underTest;
+    private PublicController underTest;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new SecureRandomController();
+        underTest = new PublicController();
     }
 
     @Test

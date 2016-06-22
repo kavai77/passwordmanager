@@ -38,28 +38,35 @@
         <ng-include src="'alerts.html'"></ng-include>
         <div class="jumbotron" ng-show="(masterKey ? false : true)">
             <h1>Welcome to Password Manager!</h1>
-            <div ng-show="user ? false : true">
+            <div ng-show="auth ? false : true">
                 <p><img src="image/ajax-loader.gif" class="center-block"></p>
             </div>
-            <div ng-show="user ? true : false">
-                <form class="form-group" ng-show="user.encodedUserId ? false : true" ng-submit="addEncodedUserId()"
-                      autocomplete="off">
-                    <p class="lead">It seems your are a first time visitor of Password Manager!</p>
-                    <p class="lead">In order to proceed, please create your Master Password</p>
-                    <p><input class="form-control" ng-model="newMasterPassword1" type="password" placeholder="Master Password"/></p>
-                    <p><input class="form-control" ng-model="newMasterPassword2" type="password" placeholder="Type again"/></p>
-                    <p><button type="submit" class="btn btn-primary btn-lg">Create</button></p>
-                </form>
-                <form class="form-group" ng-show="user.encodedUserId ? true : false" ng-submit="masterPasswordLogin()"
-                      autocomplete="off">
-                    <p class="lead">In order to proceed, please provide your Master Password</p>
+            <div ng-show="auth ? true : false">
+                <div ng-show="auth.authenticated ? false : true">
                     <p>
-                        <label for="modelMasterPwdInput" class="sr-only">Master Password</label>
-                        <input id="modelMasterPwdInput" class="form-control" ng-model="modelMasterPwd" type="password"
-                               placeholder="Master Password" autofocus/>
+                        <a class="btn btn-primary btn-lg" ng-href="{{auth.loginUrl}}">Login with Google Account</a>
                     </p>
-                    <p><button type="submit" class="btn btn-primary btn-lg">Proceed</button></p>
-                </form>
+                </div>
+                <div ng-show="user ? true : false">
+                    <form class="form-group" ng-show="user.encodedUserId ? false : true" ng-submit="addEncodedUserId()"
+                          autocomplete="off">
+                        <p class="lead">It seems your are a first time visitor of Password Manager!</p>
+                        <p class="lead">In order to proceed, please create your Master Password</p>
+                        <p><input class="form-control" ng-model="newMasterPassword1" type="password" placeholder="Master Password"/></p>
+                        <p><input class="form-control" ng-model="newMasterPassword2" type="password" placeholder="Type again"/></p>
+                        <p><button type="submit" class="btn btn-primary btn-lg">Create</button></p>
+                    </form>
+                    <form class="form-group" ng-show="user.encodedUserId ? true : false" ng-submit="masterPasswordLogin()"
+                          autocomplete="off">
+                        <p class="lead">In order to proceed, please provide your Master Password</p>
+                        <p>
+                            <label for="modelMasterPwdInput" class="sr-only">Master Password</label>
+                            <input id="modelMasterPwdInput" class="form-control" ng-model="modelMasterPwd" type="password"
+                                   placeholder="Master Password" autofocus/>
+                        </p>
+                        <p><button type="submit" class="btn btn-primary btn-lg">Proceed</button></p>
+                    </form>
+                </div>
                 <span class="label label-default">SECURITY</span>The cipher algorithm uses the master password to encrypt and decrypt your passwords.
                 The server stores only your encrypted passwords which are <strong>impossible to decrypt without your master password</strong>.
                 <br>

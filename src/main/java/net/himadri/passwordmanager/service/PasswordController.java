@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,11 +19,12 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 import static org.springframework.util.Assert.*;
 
 @RestController
-public class StoreController {
-    private static final Logger LOG = Logger.getLogger(StoreController.class.getName());
+@RequestMapping(value = "/secure/password")
+public class PasswordController {
+    private static final Logger LOG = Logger.getLogger(PasswordController.class.getName());
 
-    @Autowired RetrieveController retrieveController;
-    @Autowired EncodedUserIdController encodedUserIdController;
+    @Autowired
+    UserController encodedUserIdController;
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
     public Password store(@RequestParam String domain, @RequestParam String hex, @RequestParam String iv)  {
@@ -69,7 +72,7 @@ public class StoreController {
         hasText(masterPasswordMd5Hash);
         isTrue(iterations > 0);
         notNull(allPasswords);
-        List<Password> oldPasswords = retrieveController.retrieve();
+        List<Password> oldPasswords = retrieve();
         isTrue(allPasswords.size() == oldPasswords.size());
         for (Password password: allPasswords) {
             Password storedPassword = searchUserPassword(oldPasswords, password.getId());
@@ -86,6 +89,19 @@ public class StoreController {
             ofy().save().entities(oldPasswords);
             throw e;
         }
+    }
+
+    @RequestMapping("/retrieve")
+    public List<Password> retrieve() {
+        String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
+        List<Password> passwords = ofy().load().type(Password.class).filter("userId", userId).order("domain").list();
+        Collections.sort(passwords, new Comparator<Password>() {
+            @Override
+            public int compare(Password o1, Password o2) {
+                return o1.getDomain().toLowerCase().compareTo(o2.getDomain().toLowerCase());
+            }
+        });
+        return passwords;
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

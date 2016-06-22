@@ -42,11 +42,26 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>securedapp</web-resource-name>
-            <url-pattern>/*</url-pattern>
+            <url-pattern>/secure/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>*</role-name>
         </auth-constraint>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>adminapp</web-resource-name>
+            <url-pattern>/admin/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>https</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
         <user-data-constraint>
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>

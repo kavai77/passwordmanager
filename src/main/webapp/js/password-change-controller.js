@@ -9,8 +9,13 @@ app.controller('ctrl', function ($scope, $http) {
         return viewLocation === window.location.pathname;
     };
 
-    $http.get('/service/userService').then(function successCallback(response) {
-        $scope.user = response.data;
+    $http.get('/service/public/authenticate').then(function successCallback(response) {
+        $scope.auth = response.data;
+        if ($scope.auth.authenticated) {
+            $http.get('/service/secure/user/userService').then(function successCallback(response) {
+                $scope.user = response.data;
+            }, defaultServerError);
+        }
     }, defaultServerError);
 
     $scope.changeMasterPassword = function() {
@@ -27,18 +32,18 @@ app.controller('ctrl', function ($scope, $http) {
 
         $http({
             method: "post",
-            url: "/service/encodedUserId/check",
+            url: "/service/secure/user/check",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "md5Hash=" + md5Hash
         }).then(function successCallback() {
             var masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations);
             $scope.modelMasterPwd = null;
-            $http.get('/service/retrieve').then(function successCallback(response) {
+            $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 var domains = response.data;
 
                 $http({
                     method: "get",
-                    url: "/service/encodedUserId/recommendedIterations"
+                    url: "/service/secure/user/recommendedIterations"
                 }).then(function successCallback(response){
                     var newIterations = response.data;
                     var newMasterPasswordHash = md5($scope.newMasterPassword1);
@@ -53,7 +58,7 @@ app.controller('ctrl', function ($scope, $http) {
                     }
                     $http({
                         method: "post",
-                        url: "/service/changeAllHex?md5Hash="+ newMasterPasswordHash + "&iterations=" + newIterations,
+                        url: "/service/secure/password/changeAllHex?md5Hash="+ newMasterPasswordHash + "&iterations=" + newIterations,
                         headers: {'Content-Type': 'application/json'},
                         data: domains
                     }).then(function successCallback(response){

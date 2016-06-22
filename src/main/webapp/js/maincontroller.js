@@ -17,14 +17,23 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         return viewLocation === window.location.pathname;
     };
 
-    $scope.login = function(onSuccess) {
-        $http.get('/service/userService').then(function successCallback(response) {
+    $scope.getUser = function(onSuccess) {
+        $http.get('/service/secure/user/userService').then(function successCallback(response) {
             $scope.user = response.data;
             if (onSuccess != null) onSuccess();
         }, defaultServerError);
     };
 
-    $scope.login(null);
+    $scope.login = function() {
+        $http.get('/service/public/authenticate').then(function successCallback(response) {
+            $scope.auth = response.data;
+            if ($scope.auth.authenticated) {
+                $scope.getUser(null);
+            }
+        }, defaultServerError);
+    };
+
+    $scope.login();
 
     $scope.showOrHidePassword = function(domain) {
         $scope.clearMessages();
@@ -66,7 +75,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         var hex = encode($scope.newPassword, $scope.masterKey, iv);
         $http({
             method: "post",
-            url: "/service/store",
+            url: "/service/secure/password/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "domain=" + $scope.newDomain + "&hex=" + hex + "&iv=" + forge.util.bytesToHex(iv)
         }).then(function successCallback(response){
@@ -83,14 +92,14 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         var md5Hash = md5($scope.modelMasterPwd);
         $http({
             method: "post",
-            url: "/service/encodedUserId/check",
+            url: "/service/secure/user/check",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "md5Hash=" + md5Hash
         }).then(function successCallback(response) {
             $scope.clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations);
             $scope.modelMasterPwd = null;
-            $http.get('/service/retrieve').then(function successCallback(response) {
+            $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
             }, defaultServerError);
             $timeout(function() {
@@ -113,19 +122,19 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         var hex = md5($scope.newMasterPassword1);
         $http({
             method: "post",
-            url: "/service/encodedUserId/store",
+            url: "/service/secure/user/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations
         }).then(function successCallback(response){
             $scope.modelMasterPwd = $scope.newMasterPassword1;
             $scope.newMasterPassword1 = null;
             $scope.newMasterPassword2 = null;
-            $scope.login($scope.masterPasswordLogin);
+            $scope.getUser($scope.masterPasswordLogin);
         }, defaultServerError);
     };
     $scope.randomPassword = function() {
         $scope.clearMessages();
-        $http.get('/service/secureRandom').then(function successCallback(response) {
+        $http.get('/service/public/secureRandom').then(function successCallback(response) {
             $scope.newPassword = $scope.jsRandomPasswordEnhancer(response.data);
         }, defaultServerError);
     };
@@ -147,7 +156,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         var beforeUpdate = domain.domain;
         $http({
             method: "post",
-            url: "/service/changeDomain",
+            url: "/service/secure/password/changeDomain",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "id=" + domain.id + "&domain=" + data
         }).then(function successCallback(response){
@@ -175,7 +184,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         var hex = encode(data, $scope.masterKey, iv);
         $http({
             method: "post",
-            url: "/service/changeHex",
+            url: "/service/secure/password/changeHex",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "id=" + domain.id + "&hex=" + hex + "&iv=" + forge.util.bytesToHex(iv)
         }).then(function successCallback(response){
@@ -193,7 +202,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
     $scope.deleteDomain = function() {
         $http({
             method: "post",
-            url: "/service/deletePassword",
+            url: "/service/secure/password/deletePassword",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "id=" + $scope.domainToBeDeleted.id
         }).then(function successCallback(response){
