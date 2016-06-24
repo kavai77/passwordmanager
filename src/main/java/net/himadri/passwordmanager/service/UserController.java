@@ -5,7 +5,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
-import net.himadri.passwordmanager.entity.EncodedUserId;
+import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.Settings;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -28,15 +28,15 @@ public class UserController {
     public void store(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations) {
         notEmpty(masterPasswordMd5Hash);
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        ofy().save().entity(new EncodedUserId(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(), iterations)).now();
+        ofy().save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(), iterations)).now();
     }
 
     @RequestMapping("/check")
     public void check(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash) {
         notEmpty(masterPasswordMd5Hash);
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        EncodedUserId userId = ofy().load().type(EncodedUserId.class).id(currentUser.getUserId()).safe();
-        if (!StringUtils.equals(masterPasswordMd5Hash, userId.getMasterPasswordMd5Hash())){
+        RegisteredUser userId = ofy().load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
+        if (!StringUtils.equals(masterPasswordMd5Hash, userId.getMasterPasswordHash())){
             throw new NotAuthorizedException();
         }
     }
@@ -50,15 +50,15 @@ public class UserController {
         UserService userService = UserServiceFactory.getUserService();
         User user = userService.getCurrentUser();
         ofy().save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
-        EncodedUserId encodedUserId = ofy().load().type(EncodedUserId.class).id(user.getUserId()).now();
-        int iterations = encodedUserId != null ? encodedUserId.getIterations() : Settings.DEFAULT_ITERATIONS;
+        RegisteredUser registeredUser = ofy().load().type(RegisteredUser.class).id(user.getUserId()).now();
+        int iterations = registeredUser != null ? registeredUser.getIterations() : Settings.DEFAULT_ITERATIONS;
         return new UserData(user.getUserId(), user.getNickname(), userService.createLogoutURL("/"),
-                encodedUserId != null, iterations);
+                registeredUser != null, iterations);
     }
 
-    public EncodedUserId getEncodedUserId() {
+    public RegisteredUser getRegisteredUser() {
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        return ofy().load().type(EncodedUserId.class).id(currentUser.getUserId()).safe();
+        return ofy().load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

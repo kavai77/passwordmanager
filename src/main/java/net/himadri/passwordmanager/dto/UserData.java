@@ -7,14 +7,14 @@ public class UserData {
     private final String userId;
     private final String nickName;
     private final String logoutURL;
-    private final boolean encodedUserId;
+    private final boolean registered;
     private int iterations;
 
-    public UserData(String userId, String nickName, String logoutURL, boolean encodedUserId, int iterations) {
+    public UserData(String userId, String nickName, String logoutURL, boolean registered, int iterations) {
         this.userId = userId;
         this.nickName = nickName;
         this.logoutURL = logoutURL;
-        this.encodedUserId = encodedUserId;
+        this.registered = registered;
         this.iterations = iterations;
     }
 
@@ -30,8 +30,8 @@ public class UserData {
         return logoutURL;
     }
 
-    public boolean isEncodedUserId() {
-        return encodedUserId;
+    public boolean isRegistered() {
+        return registered;
     }
 
     public int getIterations() {

@@ -34,6 +34,14 @@
         <filter-name>ObjectifyFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <filter>
+        <filter-name>NoCacheServletFilter</filter-name>
+        <filter-class>net.himadri.passwordmanager.NoCacheServletFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>NoCacheServletFilter</filter-name>
+        <url-pattern>/service/*</url-pattern>
+    </filter-mapping>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -42,7 +50,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>securedapp</web-resource-name>
-            <url-pattern>/secure/*</url-pattern>
+            <url-pattern>/service/secure/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>*</role-name>
@@ -51,7 +59,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>adminapp</web-resource-name>
-            <url-pattern>/admin/*</url-pattern>
+            <url-pattern>/service/admin/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>admin</role-name>

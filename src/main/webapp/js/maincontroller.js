@@ -24,7 +24,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         }, defaultServerError);
     };
 
-    $http.post('/service/public/authenticate').then(function successCallback(response) {
+    $http.get('/service/public/authenticate').then(function successCallback(response) {
         $scope.auth = response.data;
         if ($scope.auth.authenticated) {
             $scope.getUser(null);
@@ -105,7 +105,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             $scope.errorMessage = 'Your Master Password is wrong!';
         });
     };
-    $scope.addEncodedUserId = function () {
+    $scope.registerUser = function () {
         if (!$scope.newMasterPassword1) {
             $scope.errorMessage = 'The New Password is missing!';
             return;

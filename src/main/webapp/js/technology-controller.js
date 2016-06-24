@@ -9,7 +9,7 @@ app.controller('ctrl', function ($scope, $http) {
         return viewLocation === window.location.pathname;
     };
 
-    $http.post('/service/public/authenticate').then(function successCallback(response) {
+    $http.get('/service/public/authenticate').then(function successCallback(response) {
         $scope.auth = response.data;
         if ($scope.auth.authenticated) {
             $http.get('/service/secure/user/userService').then(function successCallback(response) {

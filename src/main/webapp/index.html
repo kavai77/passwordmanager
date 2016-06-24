@@ -48,7 +48,7 @@
                     </p>
                 </div>
                 <div ng-show="user ? true : false">
-                    <form class="form-group" ng-show="user.encodedUserId ? false : true" ng-submit="addEncodedUserId()"
+                    <form class="form-group" ng-show="user.registered ? false : true" ng-submit="registerUser()"
                           autocomplete="off">
                         <p class="lead">It seems your are a first time visitor of Password Manager!</p>
                         <p class="lead">In order to proceed, please create your Master Password</p>
@@ -56,7 +56,7 @@
                         <p><input class="form-control" ng-model="newMasterPassword2" type="password" placeholder="Type again"/></p>
                         <p><button type="submit" class="btn btn-primary btn-lg">Create</button></p>
                     </form>
-                    <form class="form-group" ng-show="user.encodedUserId ? true : false" ng-submit="masterPasswordLogin()"
+                    <form class="form-group" ng-show="user.registered ? true : false" ng-submit="masterPasswordLogin()"
                           autocomplete="off">
                         <p class="lead">In order to proceed, please provide your Master Password</p>
                         <p>

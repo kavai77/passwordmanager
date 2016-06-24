@@ -2,8 +2,8 @@ package net.himadri.passwordmanager.service;
 
 import com.google.appengine.api.users.UserServiceFactory;
 import com.googlecode.objectify.NotFoundException;
-import net.himadri.passwordmanager.entity.EncodedUserId;
 import net.himadri.passwordmanager.entity.Password;
+import net.himadri.passwordmanager.entity.RegisteredUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ public class PasswordController {
     private static final Logger LOG = Logger.getLogger(PasswordController.class.getName());
 
     @Autowired
-    UserController encodedUserIdController;
+    UserController userController;
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
     public Password store(@RequestParam String domain, @RequestParam String hex, @RequestParam String iv)  {
@@ -80,12 +80,12 @@ public class PasswordController {
             isTrue(StringUtils.equals(password.getUserId(), storedPassword.getUserId()));
             isTrue(StringUtils.equals(password.getDomain(), storedPassword.getDomain()));
         }
-        EncodedUserId oldEncodedUserId = encodedUserIdController.getEncodedUserId();
+        RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
         try {
-            encodedUserIdController.store(masterPasswordMd5Hash, iterations);
+            userController.store(masterPasswordMd5Hash, iterations);
             ofy().save().entities(allPasswords);
         } catch (RuntimeException e) {
-            ofy().save().entity(oldEncodedUserId);
+            ofy().save().entity(oldRegisteredUser);
             ofy().save().entities(oldPasswords);
             throw e;
         }
