@@ -1,4 +1,4 @@
-var app=angular.module('app', ["xeditable"]);
+var app=angular.module('app', ["xeditable", "ui.bootstrap"]);
 
 app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
@@ -41,13 +41,13 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         if (!thisShown) {
             domain.shownPassword = true;
             var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
-            domain.decodedPassword = decode(domain.hex, $scope.masterKey, iv);
+            domain.decodedPassword = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         }
     };
     $scope.copyPassword = function(domain) {
         $scope.clearMessages();
         var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
-        var decodedPwd = decode(domain.hex, $scope.masterKey, iv);
+        var decodedPwd = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         var successful = copyTextToClipboard(decodedPwd);
         if (!successful) {
             $scope.errorMessage = 'Oops! Unable to copy. Make the password visible and copy it manually :-('
@@ -68,7 +68,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             return;
         }
         var iv = forge.random.getBytesSync(16);
-        var hex = encode($scope.newPassword, $scope.masterKey, iv);
+        var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         $http({
             method: "post",
             url: "/service/secure/password/store",
@@ -93,7 +93,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             data: "md5Hash=" + md5Hash
         }).then(function successCallback(response) {
             $scope.clearMessages();
-            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations);
+            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength);
             $scope.modelMasterPwd = null;
             $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
@@ -120,7 +120,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             method: "post",
             url: "/service/secure/user/store",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations
+            data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations + "&cipherAlgorithm=" + $scope.user.cipherAlgorithm + "&keyLength=" + $scope.user.keyLength
         }).then(function successCallback(response){
             $scope.modelMasterPwd = $scope.newMasterPassword1;
             $scope.newMasterPassword1 = null;
@@ -177,7 +177,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         }
         var beforeUpdate = domain.decodedPassword;
         var iv = forge.random.getBytesSync(16);
-        var hex = encode(data, $scope.masterKey, iv);
+        var hex = encode(data, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         $http({
             method: "post",
             url: "/service/secure/password/changeHex",

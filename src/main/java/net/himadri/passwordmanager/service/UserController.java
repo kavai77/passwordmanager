@@ -25,10 +25,12 @@ public class UserController {
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void store(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations) {
+    public void store(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations,
+                      @RequestParam String cipherAlgorithm, @RequestParam int keyLength) {
         notEmpty(masterPasswordMd5Hash);
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        ofy().save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(), iterations)).now();
+        ofy().save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
+                iterations, cipherAlgorithm, keyLength)).now();
     }
 
     @RequestMapping("/check")
@@ -52,8 +54,10 @@ public class UserController {
         ofy().save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
         RegisteredUser registeredUser = ofy().load().type(RegisteredUser.class).id(user.getUserId()).now();
         int iterations = registeredUser != null ? registeredUser.getIterations() : Settings.DEFAULT_ITERATIONS;
+        String cipherAlgorithm = registeredUser != null ? registeredUser.getCipherAlgorithm() : Settings.CIPHER_ALGORITHM;
+        int keyLength = registeredUser != null ? registeredUser.getKeyLength() : Settings.DEFAULT_KEYLENGTH;
         return new UserData(user.getUserId(), user.getNickname(), userService.createLogoutURL("/"),
-                registeredUser != null, iterations);
+                registeredUser != null, iterations, cipherAlgorithm, keyLength);
     }
 
     public RegisteredUser getRegisteredUser() {

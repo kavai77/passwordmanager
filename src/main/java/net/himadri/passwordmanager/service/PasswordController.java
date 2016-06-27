@@ -68,6 +68,7 @@ public class PasswordController {
     @RequestMapping(value = "/changeAllHex", method = RequestMethod.POST)
     public void changeAllHex(@RequestParam(value = "md5Hash") final String masterPasswordMd5Hash,
                              @RequestParam final int iterations,
+                             @RequestParam String cipherAlgorithm, @RequestParam int keyLength,
                              @RequestBody final List<Password> allPasswords) {
         hasText(masterPasswordMd5Hash);
         isTrue(iterations > 0);
@@ -82,7 +83,7 @@ public class PasswordController {
         }
         RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
         try {
-            userController.store(masterPasswordMd5Hash, iterations);
+            userController.store(masterPasswordMd5Hash, iterations, cipherAlgorithm, keyLength);
             ofy().save().entities(allPasswords);
         } catch (RuntimeException e) {
             ofy().save().entity(oldRegisteredUser);

@@ -22,6 +22,7 @@
 
     <script type="text/javascript" src="js/forge.min.js"></script>
     <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/ui-bootstrap-1.3.3.min.js"></script>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/cipher.js"></script>
@@ -50,21 +51,39 @@
                 <div ng-show="user ? true : false">
                     <form class="form-group" ng-show="user.registered ? false : true" ng-submit="registerUser()"
                           autocomplete="off">
-                        <p class="lead">It seems your are a first time visitor of Password Manager!</p>
-                        <p class="lead">In order to proceed, please create your Master Password</p>
-                        <p><input class="form-control" ng-model="newMasterPassword1" type="password" placeholder="Master Password"/></p>
-                        <p><input class="form-control" ng-model="newMasterPassword2" type="password" placeholder="Type again"/></p>
-                        <p><button type="submit" class="btn btn-primary btn-lg">Create</button></p>
+                        <label class="lead">
+                            It seems your are a first time visitor of Password Manager!<br>
+                            In order to proceed, please create your Master Password
+                        </label>
+                        <div class="form-group">
+                            <input class="form-control" ng-model="newMasterPassword1" type="password" placeholder="Master Password"/>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" ng-model="newMasterPassword2" type="password" placeholder="Type again"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Encryption Key Size (larger means stronger encryption) *</label><br>
+                            <div id="keyStrengthGroup" class="btn-group">
+                                <label class="btn btn-primary" ng-model="user.keyLength" uib-btn-radio="128"> 128 bit </label>
+                                <label class="btn btn-primary" ng-model="user.keyLength" uib-btn-radio="192"> 192 bit </label>
+                                <label class="btn btn-primary" ng-model="user.keyLength" uib-btn-radio="256"> 256 bit </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-lg">Create</button>
+                        </div>
                     </form>
                     <form class="form-group" ng-show="user.registered ? true : false" ng-submit="masterPasswordLogin()"
                           autocomplete="off">
-                        <p class="lead">In order to proceed, please provide your Master Password</p>
-                        <p>
+                        <label class="lead">In order to proceed, please provide your Master Password</label>
+                        <div class="form-group">
                             <label for="modelMasterPwdInput" class="sr-only">Master Password</label>
                             <input id="modelMasterPwdInput" class="form-control" ng-model="modelMasterPwd" type="password"
                                    placeholder="Master Password" autofocus/>
-                        </p>
-                        <p><button type="submit" class="btn btn-primary btn-lg">Proceed</button></p>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-lg">Proceed</button>
+                        </div>
                     </form>
                 </div>
                 <span class="label label-default">SECURITY</span>The cipher algorithm uses the master password to encrypt and decrypt your passwords.
@@ -76,6 +95,11 @@
                 <span class="label label-default">STANDARD</span>The app uses the industry standard <strong>AES cipher with 128, 192 or 256 bit encryption</strong> of your choice.<br>
                 <span class="label label-default">OPEN SOURCE</span>Check the source code on <a href="https://github.com/himadri77/passwordmanager" target="_blank">GitHub</a> and verify what I promise!<br>
                 <span class="label label-default">CAREFUL</span>If you forget your master password, nobody is going to be able to decrypt your stored passwords.<br>
+                <div ng-show="user ? true : false">
+                    <div ng-show="user.registered ? false : true">
+                        <br><small>* Cryptographic export rules may apply for the encryption key strength in your country of residence. Please refer to your local rules and regulations.</small>
+                    </div>
+                </div>
             </div>
         </div>
 

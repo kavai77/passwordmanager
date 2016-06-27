@@ -1,9 +1,11 @@
-var app=angular.module('app', []);
+var app=angular.module('app', ['ui.bootstrap']);
 
 app.controller('ctrl', function ($scope, $http) {
     var defaultServerError = function errorCallback(response) {
         $scope.errorMessage = 'Oops! Something went wrong :-(';
     };
+
+
 
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
@@ -14,6 +16,7 @@ app.controller('ctrl', function ($scope, $http) {
         if ($scope.auth.authenticated) {
             $http.get('/service/secure/user/userService').then(function successCallback(response) {
                 $scope.user = response.data;
+                $scope.newKeyLength = $scope.user.keyLength;
             }, defaultServerError);
         }
     }, defaultServerError);
@@ -36,7 +39,7 @@ app.controller('ctrl', function ($scope, $http) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "md5Hash=" + md5Hash
         }).then(function successCallback() {
-            var masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations);
+            var masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength);
             $scope.modelMasterPwd = null;
             $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 var domains = response.data;
@@ -47,18 +50,18 @@ app.controller('ctrl', function ($scope, $http) {
                 }).then(function successCallback(response){
                     var newIterations = response.data;
                     var newMasterPasswordHash = md5($scope.newMasterPassword1);
-                    var newMasterKey = deriveKey($scope.newMasterPassword1, $scope.user.userId, newIterations);
+                    var newMasterKey = deriveKey($scope.newMasterPassword1, $scope.user.userId, newIterations, $scope.newKeyLength);
                     for (i in domains) {
                         var domain = domains[i];
                         var decodedPassword = decode(domain.hex, masterKey,
-                            domain.iv ? forge.util.hexToBytes(domain.iv) : "");
+                            domain.iv ? forge.util.hexToBytes(domain.iv) : "", $scope.user.cipherAlgorithm);
                         var newIv = forge.random.getBytesSync(16);
                         domain.iv = forge.util.bytesToHex(newIv);
-                        domain.hex = encode(decodedPassword, newMasterKey, newIv);
+                        domain.hex = encode(decodedPassword, newMasterKey, newIv, $scope.user.cipherAlgorithm);
                     }
                     $http({
                         method: "post",
-                        url: "/service/secure/password/changeAllHex?md5Hash="+ newMasterPasswordHash + "&iterations=" + newIterations,
+                        url: "/service/secure/password/changeAllHex?md5Hash="+ newMasterPasswordHash + "&iterations=" + newIterations + "&cipherAlgorithm=" + $scope.user.cipherAlgorithm + "&keyLength=" + $scope.newKeyLength,
                         headers: {'Content-Type': 'application/json'},
                         data: domains
                     }).then(function successCallback(response){

@@ -9,13 +9,19 @@ public class UserData {
     private final String logoutURL;
     private final boolean registered;
     private int iterations;
+    private String cipherAlgorithm;
+    private int keyLength;
 
-    public UserData(String userId, String nickName, String logoutURL, boolean registered, int iterations) {
+
+    public UserData(String userId, String nickName, String logoutURL, boolean registered, int iterations,
+                    String cipherAlgorithm, int keyLength) {
         this.userId = userId;
         this.nickName = nickName;
         this.logoutURL = logoutURL;
         this.registered = registered;
         this.iterations = iterations;
+        this.cipherAlgorithm = cipherAlgorithm;
+        this.keyLength = keyLength;
     }
 
     public String getUserId() {
@@ -36,5 +42,13 @@ public class UserData {
 
     public int getIterations() {
         return iterations;
+    }
+
+    public String getCipherAlgorithm() {
+        return cipherAlgorithm;
+    }
+
+    public int getKeyLength() {
+        return keyLength;
     }
 }

@@ -1,9 +1,9 @@
-function deriveKey(password, salt, iterations) {
-    return forge.pkcs5.pbkdf2(password, salt, iterations, 32);
+function deriveKey(password, salt, iterations, keyLength) {
+    return forge.pkcs5.pbkdf2(password, salt, iterations, keyLength/8);
 }
 
-function encode(text, key, iv) {
-    var cipher = forge.cipher.createCipher('AES-CBC', key);
+function encode(text, key, iv, algorithm) {
+    var cipher = forge.cipher.createCipher(algorithm, key);
     cipher.start({iv: iv});
     cipher.update(forge.util.createBuffer(text));
     cipher.finish();
@@ -11,8 +11,8 @@ function encode(text, key, iv) {
     return encrypted.toHex();
 }
 
-function decode(encodedHex, key, iv) {
-    var decipher = forge.cipher.createDecipher('AES-CBC', key);
+function decode(encodedHex, key, iv, algorithm) {
+    var decipher = forge.cipher.createDecipher(algorithm, key);
     decipher.start({iv: iv});
     var e = forge.util.createBuffer(forge.util.hexToBytes(encodedHex));
     decipher.update(e);
