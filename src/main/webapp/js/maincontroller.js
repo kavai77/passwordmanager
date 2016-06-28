@@ -1,4 +1,4 @@
-var app=angular.module('app', ["xeditable", "nonStringSelect"]);
+var app=angular.module('app', ["xeditable", "nonStringSelect", "ui.bootstrap-slider"]);
 
 app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
@@ -12,6 +12,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
     };
 
     $scope.copySupported = document.queryCommandSupported('copy');
+    $scope.passwordLength = 27;
 
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
@@ -78,6 +79,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             $scope.domains.push(response.data);
             $scope.newDomain = null;
             $scope.newPassword = null;
+            $scope.serverPassword = null;
         }, defaultServerError);
     };
     $scope.masterPasswordLogin = function () {
@@ -128,22 +130,24 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             $scope.getUser($scope.masterPasswordLogin);
         }, defaultServerError);
     };
-    $scope.randomPassword = function() {
+    $scope.generateRandomPassword = function() {
         $scope.clearMessages();
         $http.get('/service/public/secureRandom').then(function successCallback(response) {
-            $scope.newPassword = $scope.jsRandomPasswordEnhancer(response.data);
+            $scope.serverPassword = response.data
+            $scope.jsRandomPassword($scope.passwordLength);
         }, defaultServerError);
     };
-    $scope.jsRandomPasswordEnhancer = function(password) {
+    $scope.jsRandomPassword = function() {
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for( var i = 0; i < 7; i++ ) {
+        var startIndex = Math.floor(Math.random() * $scope.serverPassword.length );
+        var password = $scope.serverPassword.concat($scope.serverPassword).slice(startIndex, startIndex + $scope.passwordLength / 2);
+        while( password.length < $scope.passwordLength ) {
             var char = possible.charAt(Math.floor(Math.random() * possible.length));
             var index = Math.floor(Math.random() * password.length);
             password = password.slice(0, index) + char + password.slice(index);
         }
 
-        return password;
+        $scope.newPassword =  password;
     };
     $scope.updateDomain = function(domain, data) {
         if (!data) {

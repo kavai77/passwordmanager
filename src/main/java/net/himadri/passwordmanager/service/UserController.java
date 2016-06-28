@@ -7,6 +7,7 @@ import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.Settings;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
+import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
 @RestController
@@ -28,6 +30,8 @@ public class UserController {
     public void store(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations,
                       @RequestParam String cipherAlgorithm, @RequestParam int keyLength) {
         notEmpty(masterPasswordMd5Hash);
+        isTrue(StringUtils.equals(cipherAlgorithm, Settings.CIPHER_ALGORITHM));
+        isTrue(ArrayUtils.contains(Settings.ALLOWED_KEYLENGTH, keyLength));
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
         ofy().save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
                 iterations, cipherAlgorithm, keyLength)).now();

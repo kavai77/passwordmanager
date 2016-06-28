@@ -8,6 +8,7 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-editable.css" rel="stylesheet"/>
+    <link href="css/bootstrap-slider.min.css" rel="stylesheet"/>
     <link href="css/xeditable.css" rel="stylesheet"/>
     <link href="css/main.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -26,6 +27,8 @@
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/non-string-select.js"></script>
+    <script type="text/javascript" src="js/bootstrap-slider.min.js"></script>
+    <script type="text/javascript" src="js/slider.js"></script>
     <script type="text/javascript" src="js/cipher.js"></script>
     <script type="text/javascript" src="js/maincontroller.js"></script>
     <script type="text/javascript" src="js/bootstrap-editable.min.js"></script>
@@ -163,10 +166,16 @@
                                 <div class="form-group" ng-class="newPasswordClass">
                                     <p><label for="newPasswordInput" class="sr-only">New Password</label>
                                     <input id="newPasswordInput" class="form-control" ng-model="newPassword" placeholder="New Password"/></p>
-                                    <p><button type="button" class="btn btn-info" ng-click="randomPassword()">
-                                        <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
-                                        Generate Password
-                                    </button></p>
+                                    <p>
+                                        <button type="button" class="btn btn-info" ng-click="generateRandomPassword()"
+                                                ng-show="serverPassword ? false : true">
+                                            <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+                                            Generate Password
+                                        </button>
+                                        <slider ng-show="serverPassword ? true : false"
+                                                ng-model="passwordLength" min="8" step="1" max="40"
+                                                on-slide="jsRandomPassword()"></slider>
+                                    </p>
                                 </div>
                             </td>
                             <td>

@@ -4,6 +4,8 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.googlecode.objectify.NotFoundException;
 import net.himadri.passwordmanager.entity.Password;
 import net.himadri.passwordmanager.entity.RegisteredUser;
+import net.himadri.passwordmanager.entity.Settings;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
+import static org.apache.commons.lang3.Validate.isTrue;
 import static org.springframework.util.Assert.*;
 
 @RestController
@@ -73,6 +76,8 @@ public class PasswordController {
         hasText(masterPasswordMd5Hash);
         isTrue(iterations > 0);
         notNull(allPasswords);
+        isTrue(StringUtils.equals(cipherAlgorithm, Settings.CIPHER_ALGORITHM));
+        isTrue(ArrayUtils.contains(Settings.ALLOWED_KEYLENGTH, keyLength));
         List<Password> oldPasswords = retrieve();
         isTrue(allPasswords.size() == oldPasswords.size());
         for (Password password: allPasswords) {
