@@ -32,9 +32,9 @@ public class PasswordController {
         hasLength(hex);
         hasLength(iv);
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        Password dataEntity = new Password(userId, domain, hex, iv);
-        ofy().save().entity(dataEntity).now();
-        return dataEntity;
+        Password password = new Password(userId, domain, hex, iv);
+        ofy().save().entity(password).now();
+        return password;
     }
 
     @RequestMapping(value = "/changeDomain", method = RequestMethod.POST)
