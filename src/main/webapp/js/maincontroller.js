@@ -1,4 +1,4 @@
-var app=angular.module('app', ["xeditable", "ui.bootstrap"]);
+var app=angular.module('app', ["xeditable", "nonStringSelect"]);
 
 app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';

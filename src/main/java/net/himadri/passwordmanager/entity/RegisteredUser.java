@@ -2,7 +2,6 @@ package net.himadri.passwordmanager.entity;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.OnLoad;
 
 @Entity
 public class RegisteredUser {
@@ -25,16 +24,6 @@ public class RegisteredUser {
         this.iterations = iterations;
         this.cipherAlgorithm = cipherAlgorithm;
         this.keyLength = keyLength;
-    }
-
-    @OnLoad
-    public void onLoad() {
-        if (cipherAlgorithm == null) {
-            cipherAlgorithm = Settings.CIPHER_ALGORITHM;
-        }
-        if (keyLength == 0) {
-            keyLength = 256;
-        }
     }
 
     public String getUserId() {

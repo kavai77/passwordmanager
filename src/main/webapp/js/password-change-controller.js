@@ -1,4 +1,4 @@
-var app=angular.module('app', ['ui.bootstrap']);
+var app=angular.module('app', ['nonStringSelect']);
 
 app.controller('ctrl', function ($scope, $http) {
     var defaultServerError = function errorCallback(response) {
