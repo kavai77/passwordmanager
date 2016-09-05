@@ -7,6 +7,7 @@ import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.Settings;
+import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -81,6 +82,4 @@ public class UserController {
         LOG.log(Level.SEVERE, "UNAUTHORIZED", e);
     }
 
-    private class NotAuthorizedException extends RuntimeException {
-    }
 }

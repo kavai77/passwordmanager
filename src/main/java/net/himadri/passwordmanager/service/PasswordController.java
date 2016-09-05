@@ -78,7 +78,7 @@ public class PasswordController {
         notNull(allPasswords);
         isTrue(StringUtils.equals(cipherAlgorithm, Settings.CIPHER_ALGORITHM));
         isTrue(ArrayUtils.contains(Settings.ALLOWED_KEYLENGTH, keyLength));
-        List<Password> oldPasswords = retrieve();
+        List<Password> oldPasswords = retrieveAllPasswords();
         isTrue(allPasswords.size() == oldPasswords.size());
         for (Password password: allPasswords) {
             Password storedPassword = searchUserPassword(oldPasswords, password.getId());
@@ -98,7 +98,7 @@ public class PasswordController {
     }
 
     @RequestMapping("/retrieve")
-    public List<Password> retrieve() {
+    public List<Password> retrieveAllPasswords() {
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
         List<Password> passwords = ofy().load().type(Password.class).filter("userId", userId).order("domain").list();
         Collections.sort(passwords, new Comparator<Password>() {
@@ -108,6 +108,11 @@ public class PasswordController {
             }
         });
         return passwords;
+    }
+
+    public void removeOldPasswords() {
+        List<Password> passwords = retrieveAllPasswords();
+        ofy().delete().entities(passwords);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
