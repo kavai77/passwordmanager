@@ -4,8 +4,8 @@ app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
 });
 
-app.controller('ctrl', function ($scope, $http, $timeout) {
-    var timeLockInMillis = 300000; // 5 minutes
+app.controller('ctrl', function ($scope, $http, $interval, $window) {
+    var timeLockInMillis = 120000; // 2 minutes
 
     var defaultServerError = function errorCallback(response) {
         $scope.errorMessage = 'Oops! Something went wrong :-(';
@@ -49,10 +49,11 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         $scope.clearMessages();
         var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
         var decodedPwd = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
-        var successful = copyTextToClipboard(decodedPwd);
-        if (!successful) {
-            $scope.errorMessage = 'Oops! Unable to copy. Make the password visible and copy it manually :-('
-        }
+        new Clipboard('.btn', {
+            text: function(trigger) {
+                return decodedPwd;
+            }
+        });
     };
     $scope.addPassword = function () {
         $scope.clearMessages();
@@ -95,16 +96,25 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
             data: "md5Hash=" + md5Hash
         }).then(function successCallback(response) {
             $scope.clearMessages();
-            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength);
-            //$scope.successMessage = "masterKey: " + forge.util.bytesToHex($scope.masterKey) + " modelMasterPwd: " + $scope.modelMasterPwd + " userId: " +  $scope.user.userId
-            //                + " iterations: " + $scope.user.iterations + " keyLength: " + $scope.user.keyLength;
-            $scope.modelMasterPwd = null;
+            deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, function(err, derivedKey) {
+                if (!err) {
+                    $scope.masterKey = derivedKey;
+                    $scope.modelMasterPwd = null;
+                } else {
+                    defaultServerError();
+
+                }
+            });
             $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
             }, defaultServerError);
-            $timeout(function() {
-                $scope.masterKey=null;
-            }, timeLockInMillis); // 5 minutes
+
+            $interval(function() {
+                $scope.timeLockExpires = $scope.lastAction + timeLockInMillis - new Date().getTime();
+                if ($scope.timeLockExpires < 0) {
+                    $window.location.reload();
+                }
+            }, 1000);
         }, function errorCallback(response) {
             $scope.errorMessage = 'Your Master Password is wrong!';
         });
@@ -155,6 +165,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         if (!data) {
             return false;
         }
+        $scope.clearMessages();
         var beforeUpdate = domain.domain;
         $http({
             method: "post",
@@ -181,6 +192,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         if (!data) {
             return false;
         }
+        $scope.clearMessages();
         var beforeUpdate = domain.decodedPassword;
         var iv = forge.random.getBytesSync(16);
         var hex = encode(data, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
@@ -202,6 +214,7 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         $scope.domainToBeDeleted = domain;
     };
     $scope.deleteDomain = function() {
+        $scope.clearMessages();
         $http({
             method: "post",
             url: "/service/secure/password/deletePassword",
@@ -215,5 +228,6 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
     $scope.clearMessages = function() {
         $scope.errorMessage = null;
         $scope.successMessage = null;
+        $scope.lastAction = new Date().getTime();
     };
 });
