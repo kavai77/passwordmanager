@@ -96,6 +96,8 @@ app.controller('ctrl', function ($scope, $http, $timeout) {
         }).then(function successCallback(response) {
             $scope.clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength);
+            //$scope.successMessage = "masterKey: " + forge.util.bytesToHex($scope.masterKey) + " modelMasterPwd: " + $scope.modelMasterPwd + " userId: " +  $scope.user.userId
+            //                + " iterations: " + $scope.user.iterations + " keyLength: " + $scope.user.keyLength;
             $scope.modelMasterPwd = null;
             $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
