@@ -12,7 +12,7 @@ app.controller('ctrl', function ($scope, $http) {
     $scope.hexes = [];
 
     for (i = 0; i < 50; i++) {
-        var key = deriveKey("abc123abc", "salt", 2000, 192);
+        var key = forge.pkcs5.pbkdf2("abc123abc", "salt", 2000, 24, 'sha1');
         var obj = new Object();
         obj.index = i;
         obj.value = forge.util.bytesToHex(key);
