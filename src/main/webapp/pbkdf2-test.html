@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Password Manager</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon-precomposed" href="image/key-152-211406.png">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/pbkdf2-test-controller.js"></script>
+    <script type="text/javascript" src="js/cipher.js"></script>
+    <script type="text/javascript" src="js/forge.min.js"></script>
+
+</head>
+<body ng-controller="ctrl">
+<ng-include src="'header.html'"></ng-include>
+<div class="container">
+    <div class="starter-template">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Testing digitalbazaar/forge with the following code</h3>
+            </div>
+            <div class="panel-body">
+<pre><code>var key = forge.pkcs5.pbkdf2("abc123abc", "salt", 2000, 24, "sha1");
+var hex = forge.util.bytesToHex(key);</code></pre>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>PDBKF2 BytesToHex Tester</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="hex in hexes">
+                    <td>{{hex.value}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

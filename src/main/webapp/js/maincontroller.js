@@ -96,15 +96,9 @@ app.controller('ctrl', function ($scope, $http, $interval, $window) {
             data: "md5Hash=" + md5Hash
         }).then(function successCallback(response) {
             $scope.clearMessages();
-            deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, function(err, derivedKey) {
-                if (!err) {
-                    $scope.masterKey = derivedKey;
-                    $scope.modelMasterPwd = null;
-                } else {
-                    defaultServerError();
+            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength);
+            $scope.modelMasterPwd = null;
 
-                }
-            });
             $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
                 $scope.domains = response.data;
             }, defaultServerError);
