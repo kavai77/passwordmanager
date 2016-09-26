@@ -3,6 +3,7 @@ package net.himadri.passwordmanager.service;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import net.himadri.passwordmanager.dto.RecommendedSettings;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
 import net.himadri.passwordmanager.entity.RegisteredUser;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
+import static net.himadri.passwordmanager.entity.Settings.*;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
@@ -26,16 +28,16 @@ import static org.apache.commons.lang3.Validate.notEmpty;
 public class UserController {
     private static final Logger LOG = Logger.getLogger(UserController.class.getName());
 
-    @RequestMapping(value = "/store", method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void store(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations,
-                      @RequestParam String cipherAlgorithm, @RequestParam int keyLength) {
+    public void register(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations,
+                         @RequestParam String cipherAlgorithm, @RequestParam int keyLength, @RequestParam String pbkdf2Algorithm) {
         notEmpty(masterPasswordMd5Hash);
-        isTrue(StringUtils.equals(cipherAlgorithm, Settings.CIPHER_ALGORITHM));
-        isTrue(ArrayUtils.contains(Settings.ALLOWED_KEYLENGTH, keyLength));
+        isTrue(StringUtils.equals(cipherAlgorithm, CIPHER_ALGORITHM));
+        isTrue(ArrayUtils.contains(ALLOWED_KEYLENGTH, keyLength));
         User currentUser = UserServiceFactory.getUserService().getCurrentUser();
         ofy().save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
-                iterations, cipherAlgorithm, keyLength)).now();
+                iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm)).now();
     }
 
     @RequestMapping("/check")
@@ -47,9 +49,9 @@ public class UserController {
             throw new NotAuthorizedException();
         }
     }
-    @RequestMapping("/recommendedIterations")
-    public int getRecommendedIterations() {
-        return Settings.DEFAULT_ITERATIONS;
+    @RequestMapping("/recommendedSettings")
+    public RecommendedSettings getRecommendedSettings() {
+        return new RecommendedSettings(DEFAULT_ITERATIONS, Settings.DEFAULT_PBKDF2_ALGORITHM);
     }
 
     @RequestMapping("/userService")
@@ -58,11 +60,12 @@ public class UserController {
         User user = userService.getCurrentUser();
         ofy().save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
         RegisteredUser registeredUser = ofy().load().type(RegisteredUser.class).id(user.getUserId()).now();
-        int iterations = registeredUser != null ? registeredUser.getIterations() : Settings.DEFAULT_ITERATIONS;
-        String cipherAlgorithm = registeredUser != null ? registeredUser.getCipherAlgorithm() : Settings.CIPHER_ALGORITHM;
+        int iterations = registeredUser != null ? registeredUser.getIterations() : DEFAULT_ITERATIONS;
+        String cipherAlgorithm = registeredUser != null ? registeredUser.getCipherAlgorithm() : CIPHER_ALGORITHM;
         int keyLength = registeredUser != null ? registeredUser.getKeyLength() : Settings.DEFAULT_KEYLENGTH;
+        String pbkdf2Algorithm = registeredUser != null ? registeredUser.getPbkdf2Algorithm() : Settings.DEFAULT_PBKDF2_ALGORITHM;
         return new UserData(user.getUserId(), user.getNickname(), userService.createLogoutURL("/"),
-                registeredUser != null, iterations, cipherAlgorithm, keyLength);
+                registeredUser != null, iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm);
     }
 
     public RegisteredUser getRegisteredUser() {
@@ -73,13 +76,13 @@ public class UserController {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleIllegalArgumentException(Exception e) {
-        LOG.log(Level.SEVERE, "BAD_REQUEST", e);
+        LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage());
     }
 
     @ExceptionHandler(NotAuthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleNotAuthorizedException(Exception e) {
-        LOG.log(Level.SEVERE, "UNAUTHORIZED", e);
+        LOG.log(Level.SEVERE, "UNAUTHORIZED: " + e.getMessage());
     }
 
 }

@@ -17,17 +17,20 @@ public class Backup {
     private int iterations;
     private String cipherAlgorithm;
     private int keyLength;
+    private String pbkdf2Algorithm;
     private Date backupDate;
 
     public Backup() {
     }
 
-    public Backup(String userId, String masterPasswordHash, int iterations, String cipherAlgorithm, int keyLength, Date backupDate) {
+    public Backup(String userId, String masterPasswordHash, int iterations, String cipherAlgorithm, int keyLength,
+                  String pbkdf2Algorithm, Date backupDate) {
         this.userId = userId;
         this.masterPasswordHash = masterPasswordHash;
         this.iterations = iterations;
         this.cipherAlgorithm = cipherAlgorithm;
         this.keyLength = keyLength;
+        this.pbkdf2Algorithm = pbkdf2Algorithm;
         this.backupDate = backupDate;
     }
 
@@ -69,6 +72,14 @@ public class Backup {
 
     public void setKeyLength(int keyLength) {
         this.keyLength = keyLength;
+    }
+
+    public String getPbkdf2Algorithm() {
+        return pbkdf2Algorithm;
+    }
+
+    public void setPbkdf2Algorithm(String pbkdf2Algorithm) {
+        this.pbkdf2Algorithm = pbkdf2Algorithm;
     }
 
     public Date getBackupDate() {

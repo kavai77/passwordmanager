@@ -8,13 +8,13 @@ public class UserData {
     private final String nickName;
     private final String logoutURL;
     private final boolean registered;
-    private int iterations;
-    private String cipherAlgorithm;
-    private int keyLength;
-
+    private final int iterations;
+    private final String cipherAlgorithm;
+    private final int keyLength;
+    private final String pbkdf2Algorithm;
 
     public UserData(String userId, String nickName, String logoutURL, boolean registered, int iterations,
-                    String cipherAlgorithm, int keyLength) {
+                    String cipherAlgorithm, int keyLength, String pbkdf2Algorithm) {
         this.userId = userId;
         this.nickName = nickName;
         this.logoutURL = logoutURL;
@@ -22,6 +22,7 @@ public class UserData {
         this.iterations = iterations;
         this.cipherAlgorithm = cipherAlgorithm;
         this.keyLength = keyLength;
+        this.pbkdf2Algorithm = pbkdf2Algorithm;
     }
 
     public String getUserId() {
@@ -50,5 +51,9 @@ public class UserData {
 
     public int getKeyLength() {
         return keyLength;
+    }
+
+    public String getPbkdf2Algorithm() {
+        return pbkdf2Algorithm;
     }
 }

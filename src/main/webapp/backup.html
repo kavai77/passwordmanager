@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Password Manager</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon-precomposed" href="image/key-152-211406.png">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/forge.min.js"></script>
+    <script type="text/javascript" src="js/cipher.js"></script>
+    <script type="text/javascript" src="js/backup-controller.js"></script>
+
+</head>
+<body ng-controller="ctrl">
+
+<ng-include src="'header.html'"></ng-include>
+<div class="container">
+    <div class="starter-template">
+        <ng-include src="'alerts.html'"></ng-include>
+        <div class="jumbotron" ng-show="(masterKey ? false : true)">
+            <h1>Backup</h1>
+            <div ng-show="auth ? false : true">
+                <p><img src="image/ajax-loader.gif" class="center-block"></p>
+            </div>
+            <div ng-show="auth ? true : false">
+                <div ng-show="auth.authenticated ? false : true">
+                    <p>
+                        <a class="btn btn-primary btn-lg" ng-href="{{auth.loginUrl}}">Login with Google Account</a>
+                    </p>
+                </div>
+                <div ng-show="user ? true : false">
+                    <div ng-show="user.registered ? true : false">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Number of passwords</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="backup in backups">
+                                <td>{{backup.backupDate}}</td>
+                                <td>{{backup.numberOfPasswords}}</td>
+                                <td>
+                                    <button class="btn btn-info" ng-click="prepareBackup(backup)"
+                                            data-toggle="modal" data-target="#confirm">
+                                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                                        Restore
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-success" ng-click="createBackup()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            Create Backup
+                        </button>
+                    </div>
+                    <div ng-show="user.registered ? false : true">
+                        <p class="lead">You have not stored any password yet, so you cannot backup.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="confirm" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Restore backup</h4>
+            </div>
+            <div class="modal-body">
+                <label class="lead">Are you sure you want to restore this backup? All your stored passwords will be overwritten!</label>
+                <div class="form-group">
+                    <label for="backupMasterPwdInput" class="sr-only">Backup's Master Password</label>
+                    <input id="backupMasterPwdInput" class="form-control" ng-model="backupMasterPwd" type="password"
+                           placeholder="Backup's Master Password" autofocus/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-primary" ng-click="restoreBackup()">Restore</button>
+                <button type="button" data-dismiss="modal" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

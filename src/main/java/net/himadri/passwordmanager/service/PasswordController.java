@@ -72,6 +72,7 @@ public class PasswordController {
     public void changeAllHex(@RequestParam(value = "md5Hash") final String masterPasswordMd5Hash,
                              @RequestParam final int iterations,
                              @RequestParam String cipherAlgorithm, @RequestParam int keyLength,
+                             @RequestParam String pbkdf2Algorithm,
                              @RequestBody final List<Password> allPasswords) {
         hasText(masterPasswordMd5Hash);
         isTrue(iterations > 0);
@@ -88,7 +89,7 @@ public class PasswordController {
         }
         RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
         try {
-            userController.store(masterPasswordMd5Hash, iterations, cipherAlgorithm, keyLength);
+            userController.register(masterPasswordMd5Hash, iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm);
             ofy().save().entities(allPasswords);
         } catch (RuntimeException e) {
             ofy().save().entity(oldRegisteredUser);
@@ -110,7 +111,7 @@ public class PasswordController {
         return passwords;
     }
 
-    public void removeOldPasswords() {
+    public void removeAllPasswords() {
         List<Password> passwords = retrieveAllPasswords();
         ofy().delete().entities(passwords);
     }
@@ -118,7 +119,7 @@ public class PasswordController {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleIllegalArgumentException(Exception e) {
-        LOG.log(Level.SEVERE, "BAD_REQUEST", e);
+        LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage());
     }
 
     @ExceptionHandler(NullPointerException.class)
@@ -130,7 +131,7 @@ public class PasswordController {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleNotFoundException(Exception e) {
-        LOG.log(Level.SEVERE, "BAD_REQUEST", e);
+        LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage());
     }
 
     private Password getUserPassword(Long id) {

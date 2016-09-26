@@ -96,7 +96,7 @@ app.controller('ctrl', function ($scope, $http, $interval, $window) {
             data: "md5Hash=" + md5Hash
         }).then(function successCallback(response) {
             $scope.clearMessages();
-            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength);
+            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
 
             $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
@@ -126,9 +126,9 @@ app.controller('ctrl', function ($scope, $http, $interval, $window) {
         var hex = md5($scope.newMasterPassword1);
         $http({
             method: "post",
-            url: "/service/secure/user/store",
+            url: "/service/secure/user/register",
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations + "&cipherAlgorithm=" + $scope.user.cipherAlgorithm + "&keyLength=" + $scope.user.keyLength
+            data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations + "&cipherAlgorithm=" + $scope.user.cipherAlgorithm + "&keyLength=" + $scope.user.keyLength + "&pbkdf2Algorithm=" + $scope.user.pbkdf2Algorithm
         }).then(function successCallback(response){
             $scope.modelMasterPwd = $scope.newMasterPassword1;
             $scope.newMasterPassword1 = null;

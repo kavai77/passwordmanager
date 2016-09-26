@@ -1,5 +1,5 @@
-function deriveKey(password, salt, iterations, keyLength) {
-    return forge.pkcs5.pbkdf2(password, salt, iterations, keyLength/8, 'sha1');
+function deriveKey(password, salt, iterations, keyLength, algorithm) {
+    return forge.pkcs5.pbkdf2(password, salt, iterations, keyLength/8, algorithm);
 }
 
 function encode(text, key, iv, algorithm) {
