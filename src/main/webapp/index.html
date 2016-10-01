@@ -114,7 +114,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="domain in domains | filter: tablefilter">
+                        <tr ng-repeat="domain in domains | filter: tablefilter" bs-popover>
                             <td class="col-xs-5 col-md-5"
                                 ng-mouseover="hoverOverDomain(domain)" ng-mouseout="leaveHoverOverDomain(domain)">
                                 <span editable-text="domain.domain" e-form="domainBtnForm"
@@ -145,10 +145,11 @@
                                     <span class="glyphicon glyphicon-eye-open" aria-hidden="true" ng-show="!domain.shownPassword"></span>
                                     <span class="glyphicon glyphicon-eye-close" aria-hidden="true" ng-show="domain.shownPassword"></span>
                                 </button>
-                                <button type="button" class="btn btn-info" ng-show="copySupported"
-                                        ng-click="copyPassword(domain)" ng-disabled="passwordBtnForm.$visible">
+                                <a tabindex="{{$index}}" role="button" class="btn btn-info" ng-show="copySupported"
+                                        ng-click="copyPassword(domain)" ng-disabled="passwordBtnForm.$visible"
+                                        data-toggle="popover" data-content="Copied!" data-placement="top" data-trigger="focus">
                                     <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
-                                </button>
+                                </a>
                                 <button class="btn btn-danger" ng-click="prepareDeleteDomain(domain)"
                                         data-toggle="modal" data-target="#confirm">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>

@@ -4,7 +4,13 @@ app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
 });
 
-app.controller('ctrl', function ($scope, $http, $interval, $window) {
+app.directive('bsPopover', function() {
+    return function(scope, element, attrs) {
+        $('[data-toggle="popover"]').popover();
+    };
+});
+
+app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
     var timeLockInMillis = 120000; // 2 minutes
 
     var defaultServerError = function errorCallback(response) {
