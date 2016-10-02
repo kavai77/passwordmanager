@@ -145,11 +145,11 @@
                                     <span class="glyphicon glyphicon-eye-open" aria-hidden="true" ng-show="!domain.shownPassword"></span>
                                     <span class="glyphicon glyphicon-eye-close" aria-hidden="true" ng-show="domain.shownPassword"></span>
                                 </button>
-                                <a tabindex="{{$index}}" role="button" class="btn btn-info" ng-show="copySupported"
-                                        ng-click="copyPassword(domain)" ng-disabled="passwordBtnForm.$visible"
-                                        data-toggle="popover" data-content="Copied!" data-placement="top" data-trigger="focus">
+                                <button id="copyButton{{$index}}" type="button" class="btn btn-info" ng-show="copySupported"
+                                        ng-click="copyPassword(domain, $event)" ng-disabled="passwordBtnForm.$visible"
+                                        data-toggle="popover" data-content="Copied!" data-placement="top" data-container="body">
                                     <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
-                                </a>
+                                </button>
                                 <button class="btn btn-danger" ng-click="prepareDeleteDomain(domain)"
                                         data-toggle="modal" data-target="#confirm">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>

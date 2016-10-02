@@ -51,7 +51,7 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
             domain.decodedPassword = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         }
     };
-    $scope.copyPassword = function(domain) {
+    $scope.copyPassword = function(domain, event) {
         $scope.clearMessages();
         var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
         var decodedPwd = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
@@ -60,6 +60,9 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
                 return decodedPwd;
             }
         });
+        $timeout(function () {
+            $("#" + event.target.id).popover('hide');
+        }, 3000);
     };
     $scope.addPassword = function () {
         $scope.clearMessages();
