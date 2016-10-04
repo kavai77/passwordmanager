@@ -10,10 +10,10 @@ app.directive('bsPopover', function() {
     };
 });
 
-app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $resource) {
-    var timeLockInMillis = 120000; // 2 minutes
+app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource) {
+    var timeLockInMillis = 300000; // 5 minutes
 
-    var defaultServerError = function errorCallback(response) {
+    var defaultServerError = function () {
         $scope.errorMessage = 'Oops! Something went wrong :-(';
     };
 
@@ -31,23 +31,33 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
             str.push(encodeURIComponent(p) + "=" + encodeURIComponent(data[p]));
         return str.join("&");
     };
-    var Authenticate = $resource('/service/public/authenticate');
-    var UserService = $resource('/service/secure/user/userService');
-    var SecureRandom = $resource('/service/public/secureRandom', {}, {
-        get: {transformResponse: function(data) {return {value: data};}}
+    var Authenticate = $resource('/service/public/authenticate', {}, {
+        get: {interceptor: {responseError : defaultServerError}}
     });
-    var Password = $resource('/service/secure/password/:action', {}, {
-        store: {method: 'POST', params: {action: 'store'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform}
+    var UserService = $resource('/service/secure/user/:action', {}, {
+        getUserData: {params: {action: 'userService'}, interceptor: {responseError : defaultServerError}},
+        checkMd5Hash: {method: 'POST', params: {action: 'check'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
+        register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}}
+    });
+    var SecureRandom = $resource('/service/public/secureRandom', {}, {
+        get: {transformResponse: function(data) {return {value: data};}, interceptor: {responseError : defaultServerError}}
+    });
+    var PasswordService = $resource('/service/secure/password/:action', {}, {
+        store: {method: 'POST', params: {action: 'store'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
+        changeDomain: {method: 'POST', params: {action: 'changeDomain'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
+        changeHex: {method: 'POST', params: {action: 'changeHex'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
+        deletePassword: {method: 'POST', params: {action: 'deletePassword'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
+        retrieve: {params: {action: 'retrieve'}, isArray:true, interceptor: {responseError : defaultServerError}}
     });
 
     $scope.auth = Authenticate.get(function() {
         if ($scope.auth.authenticated) {
-            $scope.user = UserService.get();
+            $scope.user = UserService.getUserData();
         }
     });
 
     $scope.showOrHidePassword = function(domain) {
-        $scope.clearMessages();
+        clearMessages();
         var thisShown = domain.shownPassword;
         for (i in $scope.domains) {
             $scope.domains[i].shownPassword = false;
@@ -60,7 +70,7 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
         }
     };
     $scope.copyPassword = function(domain, event) {
-        $scope.clearMessages();
+        clearMessages();
         var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
         var decodedPwd = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         new Clipboard('.btn', {
@@ -73,7 +83,7 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
         }, 3000);
     };
     $scope.addPassword = function () {
-        $scope.clearMessages();
+        clearMessages();
         $scope.newDomainClass = '';
         $scope.newPasswordClass = '';
         if (!$scope.newDomain) {
@@ -88,7 +98,7 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
         }
         var iv = forge.random.getBytesSync(16);
         var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
-        var newDomain = Password.store({domain: $scope.newDomain, hex: hex, iv: forge.util.bytesToHex(iv)}, function(){
+        var newDomain = PasswordService.store({domain: $scope.newDomain, hex: hex, iv: forge.util.bytesToHex(iv)}, function(){
             $scope.domains.push(newDomain);
             $scope.newDomain = null;
             $scope.newPassword = null;
@@ -100,20 +110,12 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
             $scope.errorMessage = 'Please provide your Master Password!';
             return;
         }
-        var md5Hash = md5($scope.modelMasterPwd);
-        $http({
-            method: "post",
-            url: "/service/secure/user/check",
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "md5Hash=" + md5Hash
-        }).then(function successCallback(response) {
-            $scope.clearMessages();
+        UserService.checkMd5Hash({md5Hash: md5($scope.modelMasterPwd)}, function successCallback() {
+            clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
 
-            $http.get('/service/secure/password/retrieve').then(function successCallback(response) {
-                $scope.domains = response.data;
-            }, defaultServerError);
+            $scope.domains = PasswordService.retrieve();
 
             $interval(function() {
                 $scope.timeLockExpires = $scope.lastAction + timeLockInMillis - new Date().getTime();
@@ -134,19 +136,17 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
             $scope.errorMessage = 'The two passwords are not the same!';
             return;
         }
-        $scope.clearMessages();
-        var hex = md5($scope.newMasterPassword1);
-        $http({
-            method: "post",
-            url: "/service/secure/user/register",
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations + "&cipherAlgorithm=" + $scope.user.cipherAlgorithm + "&keyLength=" + $scope.user.keyLength + "&pbkdf2Algorithm=" + $scope.user.pbkdf2Algorithm
-        }).then(function successCallback(response){
-            $window.location.reload();
-        }, defaultServerError);
+        clearMessages();
+        UserService.register({
+            md5Hash: md5($scope.newMasterPassword1),
+            iterations: $scope.user.iterations,
+            cipherAlgorithm: $scope.user.cipherAlgorithm,
+            keyLength: $scope.user.keyLength,
+            pbkdf2Algorithm: $scope.user.pbkdf2Algorithm
+        }, $window.location.reload());
     };
     $scope.generateRandomPassword = function() {
-        $scope.clearMessages();
+        clearMessages();
         var serverPasswordResource = SecureRandom.get(function() {
             $scope.serverPassword = serverPasswordResource.value;
             $scope.jsRandomPassword();
@@ -168,16 +168,9 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
         if (!data) {
             return false;
         }
-        $scope.clearMessages();
+        clearMessages();
         var beforeUpdate = domain.domain;
-        $http({
-            method: "post",
-            url: "/service/secure/password/changeDomain",
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "id=" + domain.id + "&domain=" + data
-        }).then(function successCallback(response){
-        }, function errorCallback(response) {
-            $scope.errorMessage = 'Oops! Something went wrong :-(';
+        PasswordService.changeDomain({id: domain.id, domain: data}, function() {}, function errorCallback() {
             domain.domain = beforeUpdate;
         });
         return true;
@@ -195,20 +188,15 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
         if (!data) {
             return false;
         }
-        $scope.clearMessages();
+        clearMessages();
         var beforeUpdate = domain.decodedPassword;
         var iv = forge.random.getBytesSync(16);
         var hex = encode(data, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
-        $http({
-            method: "post",
-            url: "/service/secure/password/changeHex",
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "id=" + domain.id + "&hex=" + hex + "&iv=" + forge.util.bytesToHex(iv)
-        }).then(function successCallback(response){
+        var ivHex = forge.util.bytesToHex(iv);
+        PasswordService.changeHex({id: domain.id, hex: hex, iv: ivHex}, function successCallback() {
             domain.hex = hex;
-            domain.iv = forge.util.bytesToHex(iv);
-        }, function errorCallback(response) {
-            $scope.errorMessage = 'Oops! Something went wrong :-(';
+            domain.iv = ivHex;
+        }, function errorCallback() {
             domain.decodedPassword = beforeUpdate;
         });
         return true;
@@ -217,18 +205,13 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $r
         $scope.domainToBeDeleted = domain;
     };
     $scope.deleteDomain = function() {
-        $scope.clearMessages();
-        $http({
-            method: "post",
-            url: "/service/secure/password/deletePassword",
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "id=" + $scope.domainToBeDeleted.id
-        }).then(function successCallback(response){
+        clearMessages();
+        PasswordService.deletePassword({id: $scope.domainToBeDeleted.id} , function() {
             var index = $scope.domains.indexOf($scope.domainToBeDeleted);
             $scope.domains.splice(index, 1);
-        }, defaultServerError);
+        });
     };
-    $scope.clearMessages = function() {
+    var clearMessages = function() {
         $scope.errorMessage = null;
         $scope.successMessage = null;
         $scope.lastAction = new Date().getTime();
