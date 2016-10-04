@@ -1,4 +1,4 @@
-var app=angular.module('app', ["xeditable", "nonStringSelect", "ui.bootstrap-slider"]);
+var app=angular.module('app', ["ngResource", "xeditable", "nonStringSelect", "ui.bootstrap-slider"]);
 
 app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
@@ -10,7 +10,7 @@ app.directive('bsPopover', function() {
     };
 });
 
-app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
+app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout, $resource) {
     var timeLockInMillis = 120000; // 2 minutes
 
     var defaultServerError = function errorCallback(response) {
@@ -24,19 +24,27 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
         return viewLocation === window.location.pathname;
     };
 
-    $scope.getUser = function(onSuccess) {
-        $http.get('/service/secure/user/userService').then(function successCallback(response) {
-            $scope.user = response.data;
-            if (onSuccess != null) onSuccess();
-        }, defaultServerError);
+    var urlEncoded = 'application/x-www-form-urlencoded';
+    var urlEncodedTransform = function(data) {
+        var str = [];
+        for(var p in data)
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(data[p]));
+        return str.join("&");
     };
+    var Authenticate = $resource('/service/public/authenticate');
+    var UserService = $resource('/service/secure/user/userService');
+    var SecureRandom = $resource('/service/public/secureRandom', {}, {
+        get: {transformResponse: function(data) {return {value: data};}}
+    });
+    var Password = $resource('/service/secure/password/:action', {}, {
+        store: {method: 'POST', params: {action: 'store'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform}
+    });
 
-    $http.get('/service/public/authenticate').then(function successCallback(response) {
-        $scope.auth = response.data;
+    $scope.auth = Authenticate.get(function() {
         if ($scope.auth.authenticated) {
-            $scope.getUser(null);
+            $scope.user = UserService.get();
         }
-    }, defaultServerError);
+    });
 
     $scope.showOrHidePassword = function(domain) {
         $scope.clearMessages();
@@ -80,17 +88,12 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
         }
         var iv = forge.random.getBytesSync(16);
         var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
-        $http({
-            method: "post",
-            url: "/service/secure/password/store",
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: "domain=" + $scope.newDomain + "&hex=" + hex + "&iv=" + forge.util.bytesToHex(iv)
-        }).then(function successCallback(response){
-            $scope.domains.push(response.data);
+        var newDomain = Password.store({domain: $scope.newDomain, hex: hex, iv: forge.util.bytesToHex(iv)}, function(){
+            $scope.domains.push(newDomain);
             $scope.newDomain = null;
             $scope.newPassword = null;
             $scope.serverPassword = null;
-        }, defaultServerError);
+        });
     };
     $scope.masterPasswordLogin = function () {
         if (!$scope.modelMasterPwd) {
@@ -139,18 +142,15 @@ app.controller('ctrl', function ($scope, $http, $interval, $window, $timeout) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: "md5Hash=" + hex + "&iterations=" + $scope.user.iterations + "&cipherAlgorithm=" + $scope.user.cipherAlgorithm + "&keyLength=" + $scope.user.keyLength + "&pbkdf2Algorithm=" + $scope.user.pbkdf2Algorithm
         }).then(function successCallback(response){
-            $scope.modelMasterPwd = $scope.newMasterPassword1;
-            $scope.newMasterPassword1 = null;
-            $scope.newMasterPassword2 = null;
-            $scope.getUser($scope.masterPasswordLogin);
+            $window.location.reload();
         }, defaultServerError);
     };
     $scope.generateRandomPassword = function() {
         $scope.clearMessages();
-        $http.get('/service/public/secureRandom').then(function successCallback(response) {
-            $scope.serverPassword = response.data
-            $scope.jsRandomPassword($scope.passwordLength);
-        }, defaultServerError);
+        var serverPasswordResource = SecureRandom.get(function() {
+            $scope.serverPassword = serverPasswordResource.value;
+            $scope.jsRandomPassword();
+        });
     };
     $scope.jsRandomPassword = function() {
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
