@@ -1,4 +1,4 @@
-var app=angular.module('app', ['nonStringSelect']);
+var app=angular.module('app', ['nonStringSelect', 'focus-if']);
 
 app.controller('ctrl', function ($scope, $http) {
     var defaultServerError = function errorCallback(response) {

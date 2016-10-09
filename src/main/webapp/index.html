@@ -35,6 +35,7 @@
     <script type="text/javascript" src="js/bootstrap-editable.min.js"></script>
     <script type="text/javascript" src="js/xeditable.min.js"></script>
     <script type="text/javascript" src="js/clipboard.min.js"></script>
+    <script type="text/javascript" src="js/focusIf.min.js"></script>
 
 </head>
 <body ng-controller="ctrl">
@@ -84,7 +85,7 @@
                         <div class="form-group">
                             <label for="modelMasterPwdInput" class="sr-only">Master Password</label>
                             <input id="modelMasterPwdInput" class="form-control" ng-model="modelMasterPwd" type="password"
-                                   placeholder="Master Password" autofocus/>
+                                   placeholder="Master Password" focus-if="user.registered"/>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary btn-lg">Proceed</button>
@@ -109,7 +110,7 @@
         <div class="panel panel-default" ng-show="masterKey ? true : false">
             <div class="panel-heading">My Passwords ({{domains.length}})</div>
             <div class="panel-body">
-                <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain"/>
+                <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain" focus-if="masterKey ? true : false"/>
                 <table class="table table-striped">
                     <thead>
                         <tr>
