@@ -126,7 +126,8 @@
                                     <span editable-text="domain.domain" e-form="domainBtnForm"
                                           onbeforesave="updateDomain(domain, $data)"
                                           ng-click="hoverOrLeaveOverDomain(domain)">
-                                        {{domain.domain}}
+                                        <span class="visible-xs-inline">{{stripString(domain.domain, 20)}}</span>
+                                        <span class="hidden-xs">{{domain.domain}}</span>
                                     </span>
                                     <button class="btn btn-info pull-right" ng-click="domainBtnForm.$show()"
                                             ng-show="domain.showDomainEditButton && !domainBtnForm.$visible">

@@ -216,4 +216,11 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         $scope.successMessage = null;
         $scope.lastAction = new Date().getTime();
     };
+    $scope.stripString = function (string, limit) {
+        if (string.length > limit) {
+            return string.substring(0, limit) + "...";
+        } else {
+            return string;
+        }
+    }
 });
