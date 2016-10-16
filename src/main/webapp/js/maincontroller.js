@@ -13,10 +13,6 @@ app.directive('bsPopover', function() {
 app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource) {
     var timeLockInMillis = 300000; // 5 minutes
 
-    var defaultServerError = function () {
-        $scope.errorMessage = 'Oops! Something went wrong :-(';
-    };
-
     $scope.copySupported = document.queryCommandSupported('copy');
     $scope.passwordLength = 27;
 
@@ -24,42 +20,18 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         return viewLocation === window.location.pathname;
     };
 
-    var urlEncoded = 'application/x-www-form-urlencoded';
-    var urlEncodedTransform = function(data) {
-        var str = [];
-        for(var p in data)
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(data[p]));
-        return str.join("&");
-    };
-    var Authenticate = $resource('/service/public/authenticate', {}, {
-        get: {interceptor: {responseError : defaultServerError}}
-    });
-    var UserService = $resource('/service/secure/user/:action', {}, {
-        getUserData: {params: {action: 'userService'}, interceptor: {responseError : defaultServerError}},
-        checkMd5Hash: {method: 'POST', params: {action: 'check'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
-        register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}}
-    });
-    var SecureRandom = $resource('/service/public/secureRandom', {}, {
-        get: {transformResponse: function(data) {return {value: data};}, interceptor: {responseError : defaultServerError}}
-    });
-    var PasswordService = $resource('/service/secure/password/:action', {}, {
-        store: {method: 'POST', params: {action: 'store'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
-        changeDomain: {method: 'POST', params: {action: 'changeDomain'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
-        changeHex: {method: 'POST', params: {action: 'changeHex'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
-        deletePassword: {method: 'POST', params: {action: 'deletePassword'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
-        retrieve: {params: {action: 'retrieve'}, isArray:true, interceptor: {responseError : defaultServerError}}
-    });
+    var res = initResources($scope, $resource);
 
-    $scope.auth = Authenticate.get(function() {
+    $scope.auth = res.Authenticate.get(function() {
         if ($scope.auth.authenticated) {
-            $scope.user = UserService.getUserData();
+            $scope.user = res.UserService.getUserData();
         }
     });
 
     $scope.showOrHidePassword = function(domain) {
         clearMessages();
         var thisShown = domain.shownPassword;
-        for (i in $scope.domains) {
+        for (var i = 0; i < $scope.domains.length; i++) {
             $scope.domains[i].shownPassword = false;
             $scope.domains[i].decodedPassword = '';
         }
@@ -98,7 +70,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         }
         var iv = forge.random.getBytesSync(16);
         var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
-        var newDomain = PasswordService.store({domain: $scope.newDomain, hex: hex, iv: forge.util.bytesToHex(iv)}, function(){
+        var newDomain = res.PasswordService.store({domain: $scope.newDomain, hex: hex, iv: forge.util.bytesToHex(iv)}, function(){
             $scope.domains.push(newDomain);
             $scope.newDomain = null;
             $scope.newPassword = null;
@@ -110,12 +82,12 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.errorMessage = 'Please provide your Master Password!';
             return;
         }
-        UserService.checkMd5Hash({md5Hash: md5($scope.modelMasterPwd)}, function successCallback() {
+        res.UserService.checkMd5Hash({md5Hash: md5($scope.modelMasterPwd)}, function successCallback() {
             clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
 
-            $scope.domains = PasswordService.retrieve();
+            $scope.domains = res.PasswordService.retrieve();
 
             $interval(function() {
                 $scope.timeLockExpires = $scope.lastAction + timeLockInMillis - new Date().getTime();
@@ -137,7 +109,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             return;
         }
         clearMessages();
-        UserService.register({
+        res.UserService.register({
             md5Hash: md5($scope.newMasterPassword1),
             iterations: $scope.user.iterations,
             cipherAlgorithm: $scope.user.cipherAlgorithm,
@@ -147,7 +119,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
     };
     $scope.generateRandomPassword = function() {
         clearMessages();
-        var serverPasswordResource = SecureRandom.get(function() {
+        var serverPasswordResource = res.SecureRandom.get(function() {
             $scope.serverPassword = serverPasswordResource.value;
             $scope.jsRandomPassword();
         });
@@ -170,7 +142,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         }
         clearMessages();
         var beforeUpdate = domain.domain;
-        PasswordService.changeDomain({id: domain.id, domain: data}, function() {}, function errorCallback() {
+        res.PasswordService.changeDomain({id: domain.id, domain: data}, function() {}, function errorCallback() {
             domain.domain = beforeUpdate;
         });
         return true;
@@ -193,7 +165,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         var iv = forge.random.getBytesSync(16);
         var hex = encode(data, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         var ivHex = forge.util.bytesToHex(iv);
-        PasswordService.changeHex({id: domain.id, hex: hex, iv: ivHex}, function successCallback() {
+        res.PasswordService.changeHex({id: domain.id, hex: hex, iv: ivHex}, function successCallback() {
             domain.hex = hex;
             domain.iv = ivHex;
         }, function errorCallback() {
@@ -206,7 +178,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
     };
     $scope.deleteDomain = function() {
         clearMessages();
-        PasswordService.deletePassword({id: $scope.domainToBeDeleted.id} , function() {
+        res.PasswordService.deletePassword({id: $scope.domainToBeDeleted.id} , function() {
             var index = $scope.domains.indexOf($scope.domainToBeDeleted);
             $scope.domains.splice(index, 1);
         });
