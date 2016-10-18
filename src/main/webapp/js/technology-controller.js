@@ -1,20 +1,18 @@
-var app=angular.module('app', []);
+var app=angular.module('app', ['ngResource']);
 
-app.controller('ctrl', function ($scope, $http) {
-    var defaultServerError = function errorCallback(response) {
-        $scope.errorMessage = 'Oops! Something went wrong :-(';
-    };
-
+app.controller('ctrl', function ($scope, $resource) {
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
     };
 
-    $http.get('/service/public/authenticate').then(function successCallback(response) {
-        $scope.auth = response.data;
+    var res = initResources($scope, $resource);
+
+    $scope.auth = res.Authenticate.get(function() {
         if ($scope.auth.authenticated) {
-            $http.get('/service/secure/user/userService').then(function successCallback(response) {
-                $scope.user = response.data;
-            }, defaultServerError);
+            $scope.user = res.UserService.getUserData(function () {
+                $scope.newKeyLength = $scope.user.keyLength;
+            });
         }
-    }, defaultServerError);
+    });
+
 });
