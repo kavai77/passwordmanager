@@ -16,7 +16,7 @@
                 <li ng-class="{ active: isActive('/technology.html')}"><a href="/technology.html"><span class="glyphicon glyphicon-hdd" aria-hidden="true"></span> Technology</a></li>
                 <li><a href="https://www.linkedin.com/in/csaba-kavai-4b8a4548" target="_blank"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> Meet Author</a></li>
             </ul>
-            <ul class="nav navbar-nav navbar-right" ng-show="user.$resolved">
+            <ul class="nav navbar-nav navbar-right" ng-show="user.$resolved && user.authenticated">
                 <li><p class="navbar-text"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{user.nickName}}</p></li>
                 <li><a href="{{user.logoutURL}}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
                 <li ng-show="timeLockExpires > 0"><p class="navbar-text"><span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ timeLockExpires | date:'mm:ss'}}</p></li>

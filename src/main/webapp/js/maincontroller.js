@@ -22,11 +22,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
 
     var res = initResources($scope, $resource);
 
-    $scope.auth = res.Authenticate.get(function() {
-        if ($scope.auth.authenticated) {
-            $scope.user = res.UserService.getUserData();
-        }
-    });
+    $scope.user = res.Authenticate.get();
 
     $scope.showOrHidePassword = function(domain) {
         clearMessages();

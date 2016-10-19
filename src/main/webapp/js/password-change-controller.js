@@ -7,11 +7,9 @@ app.controller('ctrl', function ($scope, $resource) {
 
     var res = initResources($scope, $resource);
 
-    $scope.auth = res.Authenticate.get(function() {
-        if ($scope.auth.authenticated) {
-            $scope.user = res.UserService.getUserData(function () {
-                $scope.newKeyLength = $scope.user.keyLength;
-            });
+    $scope.user = res.Authenticate.get(function() {
+        if ($scope.user.authenticated) {
+            $scope.newKeyLength = $scope.user.keyLength;
         }
     });
 

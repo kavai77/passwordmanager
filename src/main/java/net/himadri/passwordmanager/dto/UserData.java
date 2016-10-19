@@ -5,7 +5,9 @@ package net.himadri.passwordmanager.dto;
 */
 public class UserData {
     private final String userId;
+    private final boolean authenticated;
     private final String nickName;
+    private final String loginUrl;
     private final String logoutURL;
     private final boolean registered;
     private final int iterations;
@@ -13,10 +15,12 @@ public class UserData {
     private final int keyLength;
     private final String pbkdf2Algorithm;
 
-    public UserData(String userId, String nickName, String logoutURL, boolean registered, int iterations,
+    private UserData(String userId, boolean authenticated, String nickName, String loginUrl, String logoutURL, boolean registered, int iterations,
                     String cipherAlgorithm, int keyLength, String pbkdf2Algorithm) {
         this.userId = userId;
+        this.authenticated = authenticated;
         this.nickName = nickName;
+        this.loginUrl = loginUrl;
         this.logoutURL = logoutURL;
         this.registered = registered;
         this.iterations = iterations;
@@ -25,12 +29,30 @@ public class UserData {
         this.pbkdf2Algorithm = pbkdf2Algorithm;
     }
 
+    public static UserData userAuthenticatedInstance(String userId, String nickName,
+                                                       String logoutURL, boolean registered, int iterations,
+                                                       String cipherAlgorithm, int keyLength, String pbkdf2Algorithm) {
+        return new UserData(userId, true, nickName, null, logoutURL, registered, iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm);
+    }
+
+    public static UserData userNotAuthenticatedInstance(String loginUrl) {
+        return new UserData(null, false, null, loginUrl, null, false, 0, null,0, null);
+    }
+
     public String getUserId() {
         return userId;
     }
 
+    public boolean isAuthenticated() {
+        return authenticated;
+    }
+
     public String getNickName() {
         return nickName;
+    }
+
+    public String getLoginUrl() {
+        return loginUrl;
     }
 
     public String getLogoutURL() {

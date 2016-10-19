@@ -1,11 +1,8 @@
 package net.himadri.passwordmanager.service;
 
 import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import net.himadri.passwordmanager.dto.RecommendedSettings;
-import net.himadri.passwordmanager.dto.UserData;
-import net.himadri.passwordmanager.entity.AccessLog;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.Settings;
 import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
@@ -14,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,20 +48,6 @@ public class UserController {
     @RequestMapping("/recommendedSettings")
     public RecommendedSettings getRecommendedSettings() {
         return new RecommendedSettings(DEFAULT_ITERATIONS, Settings.DEFAULT_PBKDF2_ALGORITHM);
-    }
-
-    @RequestMapping("/userService")
-    public UserData userService() {
-        UserService userService = UserServiceFactory.getUserService();
-        User user = userService.getCurrentUser();
-        ofy().save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
-        RegisteredUser registeredUser = ofy().load().type(RegisteredUser.class).id(user.getUserId()).now();
-        int iterations = registeredUser != null ? registeredUser.getIterations() : DEFAULT_ITERATIONS;
-        String cipherAlgorithm = registeredUser != null ? registeredUser.getCipherAlgorithm() : CIPHER_ALGORITHM;
-        int keyLength = registeredUser != null ? registeredUser.getKeyLength() : Settings.DEFAULT_KEYLENGTH;
-        String pbkdf2Algorithm = registeredUser != null ? registeredUser.getPbkdf2Algorithm() : Settings.DEFAULT_PBKDF2_ALGORITHM;
-        return new UserData(user.getUserId(), user.getNickname(), userService.createLogoutURL("/"),
-                registeredUser != null, iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm);
     }
 
     public RegisteredUser getRegisteredUser() {

@@ -34,19 +34,19 @@
 <div class="container">
     <div class="starter-template">
         <ng-include src="'alerts.html'"></ng-include>
-        <div class="jumbotron" ng-show="(masterKey ? false : true)">
+        <div class="jumbotron">
             <h1>Backup</h1>
-            <div ng-show="auth ? false : true">
+            <div ng-show="!user.$resolved">
                 <p><img src="image/ajax-loader.gif" class="center-block"></p>
             </div>
-            <div ng-show="auth ? true : false">
-                <div ng-show="auth.authenticated ? false : true">
+            <div ng-show="user.$resolved">
+                <div ng-show="!user.authenticated">
                     <p>
-                        <a class="btn btn-primary btn-lg" ng-href="{{auth.loginUrl}}">Login with Google Account</a>
+                        <a class="btn btn-primary btn-lg" ng-href="{{user.loginUrl}}">Login with Google Account</a>
                     </p>
                 </div>
-                <div ng-show="user ? true : false">
-                    <div ng-show="user.registered ? true : false">
+                <div ng-show="user.authenticated">
+                    <div ng-show="user.registered">
                         <table class="table table-striped">
                             <thead>
                             <tr>
@@ -77,7 +77,7 @@
                             Create Backup
                         </button>
                     </div>
-                    <div ng-show="user.registered ? false : true">
+                    <div ng-show="!user.registered">
                         <p class="lead">You have not stored any password yet, so you cannot backup.</p>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                 <h4 class="modal-title">Restore backup</h4>
             </div>
             <div class="modal-body">
-                <label class="lead">Are you sure you want to restore this backup taken on <b>{{backupToBeRestored.backupDate}}</b>? All your stored passwords will be overwritten!</label>
+                Are you sure you want to restore this backup taken on <b>{{backupToBeRestored.backupDate}}</b>? All your stored passwords will be overwritten!
                 <div class="form-group">
                     <label for="backupMasterPwdInput" class="sr-only">Backup's Master Password</label>
                     <input id="backupMasterPwdInput" class="form-control" ng-model="backupMasterPwd" type="password"

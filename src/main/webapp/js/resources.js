@@ -18,7 +18,6 @@ function initResources($scope, $resource) {
     });
 
     resource.UserService = $resource('/service/secure/user/:action', {}, {
-        getUserData: {params: {action: 'userService'}, interceptor: {responseError : defaultServerError}},
         recommendedSettings: {params: {action: 'recommendedSettings'}, interceptor: {responseError : defaultServerError}},
         checkMd5Hash: {method: 'POST', params: {action: 'check'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
         register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}}
