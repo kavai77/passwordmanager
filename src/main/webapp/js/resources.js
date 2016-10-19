@@ -37,6 +37,13 @@ function initResources($scope, $resource) {
         retrieve: {params: {action: 'retrieve'}, isArray:true, interceptor: {responseError : defaultServerError}}
     });
 
+    resource.BackupService = $resource('/service/secure/backup/:action', {}, {
+        retrieve: {params: {action: 'retrieve'}, isArray:true, interceptor: {responseError : defaultServerError}},
+        create: {method: 'POST', params: {action: 'create'}, interceptor: {responseError : defaultServerError}},
+        restore: {method: 'POST', params: {action: 'restore'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
+        remove: {method: 'DELETE', params: {action: 'remove'}, interceptor: {responseError : defaultServerError}},
+    });
+
     return resource;
 
 }

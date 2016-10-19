@@ -19,10 +19,12 @@
     <![endif]-->
 
     <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/angular-resource.min.js"></script>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/forge.min.js"></script>
     <script type="text/javascript" src="js/cipher.js"></script>
+    <script type="text/javascript" src="js/resources.js"></script>
     <script type="text/javascript" src="js/backup-controller.js"></script>
 
 </head>
@@ -58,9 +60,13 @@
                                 <td>{{backup.numberOfPasswords}}</td>
                                 <td>
                                     <button class="btn btn-info" ng-click="prepareBackup(backup)"
-                                            data-toggle="modal" data-target="#confirm">
+                                            data-toggle="modal" data-target="#confirmRestore">
                                         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                                         Restore
+                                    </button>
+                                    <button class="btn btn-danger" ng-click="prepareDelete(backup)"
+                                            data-toggle="modal" data-target="#confirmDelete">
+                                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                     </button>
                                 </td>
                             </tr>
@@ -79,7 +85,7 @@
         </div>
     </div>
 </div>
-<div id="confirm" class="modal fade" tabindex="-1" role="dialog">
+<div id="confirmRestore" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -87,15 +93,32 @@
                 <h4 class="modal-title">Restore backup</h4>
             </div>
             <div class="modal-body">
-                <label class="lead">Are you sure you want to restore this backup? All your stored passwords will be overwritten!</label>
+                <label class="lead">Are you sure you want to restore this backup taken on <b>{{backupToBeRestored.backupDate}}</b>? All your stored passwords will be overwritten!</label>
                 <div class="form-group">
                     <label for="backupMasterPwdInput" class="sr-only">Backup's Master Password</label>
                     <input id="backupMasterPwdInput" class="form-control" ng-model="backupMasterPwd" type="password"
-                           placeholder="Backup's Master Password" autofocus/>
+                           placeholder="Backup's Master Password"/>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-primary" ng-click="restoreBackup()">Restore</button>
+                <button type="button" data-dismiss="modal" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="confirmDelete" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Delete backup</h4>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the backup taken on <b>{{backupToBeDeleted.backupDate}}</b>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-primary" ng-click="deleteBackup()">Delete</button>
                 <button type="button" data-dismiss="modal" class="btn">Cancel</button>
             </div>
         </div>

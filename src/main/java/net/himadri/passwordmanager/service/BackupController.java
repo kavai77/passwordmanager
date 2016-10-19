@@ -74,7 +74,7 @@ public class BackupController {
         return result;
     }
 
-    @RequestMapping("/remove")
+    @RequestMapping(value = "/remove", method = RequestMethod.DELETE)
     public void removeBackup(@RequestParam final Long id) {
         Backup backup = getUserBackup(id);
         ofy().delete().entity(backup);
