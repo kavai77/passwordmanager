@@ -3,8 +3,8 @@ package net.himadri.passwordmanager.service;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserServiceFactory;
 import net.himadri.passwordmanager.dto.RecommendedSettings;
+import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.RegisteredUser;
-import net.himadri.passwordmanager.entity.Settings;
 import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
-import static net.himadri.passwordmanager.entity.Settings.*;
+import static net.himadri.passwordmanager.entity.AdminSettings.*;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
@@ -47,7 +47,7 @@ public class UserController {
     }
     @RequestMapping("/recommendedSettings")
     public RecommendedSettings getRecommendedSettings() {
-        return new RecommendedSettings(DEFAULT_ITERATIONS, Settings.DEFAULT_PBKDF2_ALGORITHM);
+        return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM);
     }
 
     public RegisteredUser getRegisteredUser() {

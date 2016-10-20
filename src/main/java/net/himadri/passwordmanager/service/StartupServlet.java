@@ -12,5 +12,6 @@ public class StartupServlet extends HttpServlet {
         ObjectifyService.register(RegisteredUser.class);
         ObjectifyService.register(Backup.class);
         ObjectifyService.register(BackupItem.class);
+        ObjectifyService.register(UserSettings.class);
     }
 }

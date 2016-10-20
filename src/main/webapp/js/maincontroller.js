@@ -11,10 +11,8 @@ app.directive('bsPopover', function() {
 });
 
 app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource) {
-    var timeLockInMillis = 300000; // 5 minutes
-
     $scope.copySupported = document.queryCommandSupported('copy');
-    $scope.passwordLength = 27;
+
 
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
@@ -86,7 +84,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.domains = res.PasswordService.retrieve();
 
             $interval(function() {
-                $scope.timeLockExpires = $scope.lastAction + timeLockInMillis - new Date().getTime();
+                $scope.timeLockExpires = $scope.lastAction + $scope.user.userSettings.timeoutLengthSeconds * 1000 - new Date().getTime();
                 if ($scope.timeLockExpires < 0) {
                     $window.location.reload();
                 }
@@ -115,6 +113,9 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
     };
     $scope.generateRandomPassword = function() {
         clearMessages();
+        if ($scope.passwordLength == null) {
+            $scope.passwordLength = $scope.user.userSettings.defaultPasswordLength;
+        }
         var serverPasswordResource = res.SecureRandom.get(function() {
             $scope.serverPassword = serverPasswordResource.value;
             $scope.jsRandomPassword();
