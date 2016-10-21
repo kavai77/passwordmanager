@@ -20,7 +20,8 @@ function initResources($scope, $resource) {
     resource.UserService = $resource('/service/secure/user/:action', {}, {
         recommendedSettings: {params: {action: 'recommendedSettings'}, interceptor: {responseError : defaultServerError}},
         checkMd5Hash: {method: 'POST', params: {action: 'check'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
-        register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}}
+        register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
+        updateUserSettings: {method: 'POST', params: {action: 'userSettings'}, interceptor: {responseError : defaultServerError}}
     });
 
     resource.SecureRandom = $resource('/service/public/secureRandom', {}, {

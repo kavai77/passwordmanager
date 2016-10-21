@@ -98,8 +98,11 @@ public class UserData {
     }
 
     public static class UserSettingsData {
-        private final int defaultPasswordLength;
-        private final int timeoutLengthSeconds;
+        private int defaultPasswordLength;
+        private int timeoutLengthSeconds;
+
+        public UserSettingsData() {
+        }
 
         public UserSettingsData(int defaultPasswordLength, int timeoutLengthSeconds) {
             this.defaultPasswordLength = defaultPasswordLength;

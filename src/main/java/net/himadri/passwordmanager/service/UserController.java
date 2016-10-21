@@ -3,8 +3,10 @@ package net.himadri.passwordmanager.service;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserServiceFactory;
 import net.himadri.passwordmanager.dto.RecommendedSettings;
+import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.RegisteredUser;
+import net.himadri.passwordmanager.entity.UserSettings;
 import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +50,16 @@ public class UserController {
     @RequestMapping("/recommendedSettings")
     public RecommendedSettings getRecommendedSettings() {
         return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM);
+    }
+
+    @RequestMapping(value = "/userSettings", method = RequestMethod.POST)
+    public void updateUserSettings(@RequestBody UserData.UserSettingsData userSettingsData) {
+        RegisteredUser registeredUser = getRegisteredUser();
+        UserSettings userSettings = new UserSettings(registeredUser.getUserId(),
+                userSettingsData.getDefaultPasswordLength(),
+                userSettingsData.getTimeoutLengthSeconds());
+        ofy().save().entity(userSettings);
+
     }
 
     public RegisteredUser getRegisteredUser() {
