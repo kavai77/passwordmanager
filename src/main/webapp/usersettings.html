@@ -44,14 +44,14 @@
                 <div class="form-group">
                     <label for="timeoutLengthSeconds">Session Timeout</label>
                     <slider id="timeoutLengthSeconds" ng-model="user.userSettings.timeoutLengthSeconds"
-                            min="180" step="10" max="900"
+                            min="180" step="10" max="900" tooltip="always"
                             formatter="user.userSettings.timeoutLengthSeconds*1000 | date:'mm:ss'"></slider>
                 </div>
 
                 <div class="form-group">
                     <label for="defaultPasswordLength">Default Generated Password Length</label>
                     <slider id="defaultPasswordLength" ng-model="user.userSettings.defaultPasswordLength"
-                            min="8" step="1" max="40"></slider>
+                            min="8" step="1" max="40" tooltip="always"></slider>
                 </div>
                 <button type="submit" class="btn btn-default">Save</button>
             </form>
