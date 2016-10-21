@@ -39,48 +39,36 @@
             <div ng-show="!user.$resolved">
                 <p><img src="image/ajax-loader.gif" class="center-block"></p>
             </div>
-            <div ng-show="user.$resolved">
-                <div ng-show="!user.authenticated">
-                    <p>
-                        <a class="btn btn-primary btn-lg" ng-href="{{user.loginUrl}}">Login with Google Account</a>
-                    </p>
-                </div>
-                <div ng-show="user.authenticated">
-                    <div ng-show="user.registered">
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Number of passwords</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="backup in backups">
-                                <td>{{backup.backupDate}}</td>
-                                <td>{{backup.numberOfPasswords}}</td>
-                                <td>
-                                    <button class="btn btn-info" ng-click="prepareBackup(backup)"
-                                            data-toggle="modal" data-target="#confirmRestore">
-                                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                                        Restore
-                                    </button>
-                                    <button class="btn btn-danger" ng-click="prepareDelete(backup)"
-                                            data-toggle="modal" data-target="#confirmDelete">
-                                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <button type="button" class="btn btn-success" ng-click="createBackup()">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            Create Backup
-                        </button>
-                    </div>
-                    <div ng-show="!user.registered">
-                        <p class="lead">You have not stored any password yet, so you cannot backup.</p>
-                    </div>
-                </div>
+            <div ng-show="user.registered">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Number of passwords</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="backup in backups">
+                        <td>{{backup.backupDate}}</td>
+                        <td>{{backup.numberOfPasswords}}</td>
+                        <td>
+                            <button class="btn btn-info" ng-click="prepareBackup(backup)"
+                                    data-toggle="modal" data-target="#confirmRestore">
+                                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                                Restore
+                            </button>
+                            <button class="btn btn-danger" ng-click="prepareDelete(backup)"
+                                    data-toggle="modal" data-target="#confirmDelete">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" ng-click="createBackup()">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    Create Backup
+                </button>
             </div>
         </div>
     </div>

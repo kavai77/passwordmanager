@@ -13,7 +13,6 @@ app.directive('bsPopover', function() {
 app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource) {
     $scope.copySupported = document.queryCommandSupported('copy');
 
-
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
     };

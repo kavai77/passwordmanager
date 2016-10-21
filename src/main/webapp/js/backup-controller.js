@@ -1,6 +1,6 @@
 var app=angular.module('app', ['ngResource']);
 
-app.controller('ctrl', function ($scope, $resource) {
+app.controller('ctrl', function ($scope, $resource, $window) {
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
     };
@@ -8,7 +8,9 @@ app.controller('ctrl', function ($scope, $resource) {
     var res = initResources($scope, $resource);
 
     $scope.user = res.Authenticate.get(function() {
-        if ($scope.user.authenticated && $scope.user.registered) {
+        if (!$scope.user.registered) {
+            $window.location = "/";
+        } else {
             $scope.backups = res.BackupService.retrieve();
         }
     });
