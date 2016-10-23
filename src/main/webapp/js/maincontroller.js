@@ -52,12 +52,10 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         $scope.newDomainClass = '';
         $scope.newPasswordClass = '';
         if (!$scope.newDomain) {
-            $scope.errorMessage = 'Please provide your New Domain!';
             $scope.newDomainClass = 'has-error';
             return;
         }
         if (!$scope.newPassword) {
-            $scope.errorMessage = 'Please provide your New Password!';
             $scope.newPasswordClass = 'has-error';
             return;
         }
@@ -70,7 +68,9 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.newUserName = null;
             $scope.newPassword = null;
             $scope.serverPassword = null;
+            $scope.successMessage = "Your password has been successfully stored."
         });
+        $('#newPasswordDialog').modal('hide');
     };
     $scope.masterPasswordLogin = function () {
         if (!$scope.modelMasterPwd) {

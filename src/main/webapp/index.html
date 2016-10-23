@@ -44,7 +44,7 @@
 <div class="container">
     <div class="starter-template">
         <ng-include src="'alerts.html'"></ng-include>
-        <div class="jumbotron" ng-show="(masterKey ? false : true)">
+        <div class="jumbotron" ng-show="!masterKey">
             <h1>Welcome to Password Manager!</h1>
             <div ng-show="!user.$resolved">
                 <p><img src="image/ajax-loader.gif" class="center-block"></p>
@@ -105,11 +105,79 @@
             </div>
         </div>
 
-        <div class="panel panel-default" ng-show="masterKey ? true : false">
+        <div class="panel panel-default" ng-show="masterKey">
             <div class="panel-heading">My Passwords ({{domains.length}})</div>
             <div class="panel-body">
-                <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain" focus-if="masterKey ? true : false"/>
-                <div class="table-responsive">
+                <div>
+                    <button type="button" class="btn btn-success pull-right"
+                            data-toggle="modal" data-target="#newPasswordDialog">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        New Password
+                    </button>
+                </div>
+                <div>
+                    <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain" focus-if="masterKey ? true : false"/>
+                </div>
+                <div class="table-responsive visible-xs-inline">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr ng-repeat="domain in domains | filter: tablefilter" bs-popover>
+                                <td>
+                                    <div class="row">
+                                        <span editable-text="domain.domain" e-form="domainBtnForm"
+                                              onbeforesave="updateDomain(domain, $data)"
+                                              ng-click="hoverOrLeaveOverDomain(domain)">
+                                            {{domain.domain}}
+                                        </span>
+                                        <button class="btn btn-info pull-right" ng-click="domainBtnForm.$show()">
+                                            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                    <div class="row">
+                                        <span editable-text="domain.userName" e-form="userNameBtnForm"
+                                              onbeforesave="updateUserName(domain, $data)"
+                                              ng-click="hoverOrLeaveOverUserName(domain)">
+                                            <span ng-show="domain.userName">{{domain.userName}}</span>
+                                            <span ng-show="!domain.userName">(no username)</span>
+                                        </span>
+                                        <button class="btn btn-info pull-right" ng-click="userNameBtnForm.$show()">
+                                            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                    <div class="row">
+                                        <span ng-show="!domain.shownPassword">*******</span>
+                                        <span ng-show="domain.shownPassword"
+                                              editable-text="domain.decodedPassword" e-form="passwordBtnForm"
+                                              onbeforesave="updatePassword(domain, $data)">
+                                            {{domain.decodedPassword}}
+                                        </span>
+                                        <button class="btn btn-info pull-right" ng-click="passwordBtnForm.$show()"
+                                                ng-show="domain.shownPassword">
+                                            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                    <div class="row">
+                                        <button type="button" class="btn btn-info"
+                                                ng-click="showOrHidePassword(domain)" ng-disabled="passwordBtnForm.$visible">
+                                            <span class="glyphicon glyphicon-eye-open" aria-hidden="true" ng-show="!domain.shownPassword"></span>
+                                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true" ng-show="domain.shownPassword"></span>
+                                        </button>
+                                        <button id="copyButton{{$index}}" type="button" class="btn btn-info" ng-show="copySupported"
+                                                ng-click="copyPassword(domain, $event)" ng-disabled="passwordBtnForm.$visible"
+                                                data-toggle="popover" data-content="Copied!" data-placement="top" data-container="body">
+                                            <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
+                                        </button>
+                                        <button class="btn btn-danger" ng-click="prepareDeleteDomain(domain)"
+                                                data-toggle="modal" data-target="#confirmDeleteDialog">
+                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive hidden-xs">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -120,19 +188,18 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="domain in domains | filter: tablefilter" bs-popover>
-                                <td ng-mouseover="hoverOverDomain(domain)" ng-mouseout="leaveHoverOverDomain(domain)">
+                                <td class="col-md-4" ng-mouseover="hoverOverDomain(domain)" ng-mouseout="leaveHoverOverDomain(domain)">
                                     <span editable-text="domain.domain" e-form="domainBtnForm"
                                           onbeforesave="updateDomain(domain, $data)"
                                           ng-click="hoverOrLeaveOverDomain(domain)">
-                                        <span class="visible-xs-inline">{{stripString(domain.domain, 20)}}</span>
-                                        <span class="hidden-xs">{{domain.domain}}</span>
+                                        {{domain.domain}}
                                     </span>
                                     <button class="btn btn-info pull-right" ng-click="domainBtnForm.$show()"
                                             ng-show="domain.showDomainEditButton && !domainBtnForm.$visible">
                                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                     </button>
                                 </td>
-                                <td ng-mouseover="hoverOverUserName(domain)" ng-mouseout="leaveHoverOverUserName(domain)">
+                                <td class="col-md-3" ng-mouseover="hoverOverUserName(domain)" ng-mouseout="leaveHoverOverUserName(domain)">
                                     <span editable-text="domain.userName" e-form="userNameBtnForm"
                                           onbeforesave="updateUserName(domain, $data)"
                                           ng-click="hoverOrLeaveOverUserName(domain)">
@@ -143,7 +210,7 @@
                                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                     </button>
                                 </td>
-                                <td>
+                                <td class="col-md-3">
                                     <span ng-show="!domain.shownPassword">*******</span>
                                     <span ng-show="domain.shownPassword"
                                           editable-text="domain.decodedPassword" e-form="passwordBtnForm"
@@ -155,7 +222,7 @@
                                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                     </button>
                                 </td>
-                                <td>
+                                <td class="col-md-2">
                                     <button type="button" class="btn btn-info"
                                             ng-click="showOrHidePassword(domain)" ng-disabled="passwordBtnForm.$visible">
                                         <span class="glyphicon glyphicon-eye-open" aria-hidden="true" ng-show="!domain.shownPassword"></span>
@@ -167,48 +234,9 @@
                                         <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
                                     </button>
                                     <button class="btn btn-danger" ng-click="prepareDeleteDomain(domain)"
-                                            data-toggle="modal" data-target="#confirm">
+                                            data-toggle="modal" data-target="#confirmDeleteDialog">
                                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                     </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-group" ng-class="newDomainClass">
-                                        <label for="newDomainInput" class="sr-only">New Domain</label>
-                                        <input id="newDomainInput" class="form-control" ng-model="newDomain" placeholder="New Domain"/>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <label for="newUserNameInput" class="sr-only">New User Name</label>
-                                        <input id="newUserNameInput" class="form-control" ng-model="newUserName" placeholder="New User Name"/>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group" ng-class="newPasswordClass">
-                                        <p><label for="newPasswordInput" class="sr-only">New Password</label>
-                                        <input id="newPasswordInput" class="form-control" ng-model="newPassword" placeholder="New Password"/></p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-success" ng-click="addPassword()">
-                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                                <td colspan="2">
-                                    <button type="button" class="btn btn-info" ng-click="generateRandomPassword()"
-                                            ng-show="serverPassword ? false : true">
-                                        <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
-                                        Generate Password
-                                    </button>
-                                    <slider ng-show="serverPassword ? true : false"
-                                            ng-model="passwordLength" min="8" step="1" max="40"
-                                            on-slide="jsRandomPassword()"></slider>
                                 </td>
                             </tr>
                         </tbody>
@@ -218,12 +246,12 @@
         </div>
     </div>
 </div>
-<div id="confirm" class="modal fade" tabindex="-1" role="dialog">
+<div id="confirmDeleteDialog" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Delete domain</h4>
+                <h4 class="modal-title">Delete domain</h4>
             </div>
             <div class="modal-body">
                 Are you sure you want to delete <b>{{domainToBeDeleted.domain}}</b> and its password?
@@ -231,6 +259,48 @@
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-primary" ng-click="deleteDomain()">Delete</button>
                 <button type="button" data-dismiss="modal" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="newPasswordDialog" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">New Password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" ng-class="newDomainClass">
+                    <label for="newDomainInput" class="sr-only">New Domain</label>
+                    <input id="newDomainInput" class="form-control" ng-model="newDomain" placeholder="New Domain"/>
+                </div>
+                <div class="form-group">
+                    <label for="newUserNameInput" class="sr-only">New User Name</label>
+                    <input id="newUserNameInput" class="form-control" ng-model="newUserName" placeholder="New User Name"/>
+                </div>
+                <div class="form-group" ng-class="newPasswordClass">
+                    <label for="newPasswordInput" class="sr-only">New Password</label>
+                    <input id="newPasswordInput" class="form-control" ng-model="newPassword" placeholder="New Password"/>
+                    <button type="button" class="btn btn-info" ng-click="generateRandomPassword()"
+                            ng-show="serverPassword ? false : true">
+                        <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+                        Generate Password
+                    </button>
+                    <slider ng-show="serverPassword ? true : false"
+                            ng-model="passwordLength" min="8" step="1" max="40"
+                            on-slide="jsRandomPassword()"></slider>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" ng-click="addPassword()">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    Add Password
+                </button>
+                <button type="button" data-dismiss="modal" class="btn">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
