@@ -40,7 +40,7 @@ public class BackupController {
 
         List<Password> allPasswords = passwordController.retrieveAllPasswords();
         for (Password password: allPasswords) {
-            ofy().save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getHex(), password.getIv()));
+            ofy().save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getUserName(), password.getHex(), password.getIv()));
         }
         return new BackupData(backup.getId(), backup.getBackupDate(), allPasswords.size());
     }
@@ -91,7 +91,7 @@ public class BackupController {
     private void saveBackupPasswords(Long backupId, RegisteredUser user) {
         List<BackupItem> backupItems = getAllBackupItems(backupId);
         for (BackupItem backupItem: backupItems) {
-            ofy().save().entity(new Password(user.getUserId(), backupItem.getDomain(), backupItem.getHex(), backupItem.getIv()));
+            ofy().save().entity(new Password(user.getUserId(), backupItem.getDomain(), backupItem.getUserName(), backupItem.getHex(), backupItem.getIv()));
         }
     }
 

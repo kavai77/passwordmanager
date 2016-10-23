@@ -114,13 +114,13 @@
                         <thead>
                             <tr>
                                 <th>Domain</th>
+                                <th>User Name</th>
                                 <th colspan="2">Password</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="domain in domains | filter: tablefilter" bs-popover>
-                                <td class="col-xs-5 col-md-5"
-                                    ng-mouseover="hoverOverDomain(domain)" ng-mouseout="leaveHoverOverDomain(domain)">
+                                <td ng-mouseover="hoverOverDomain(domain)" ng-mouseout="leaveHoverOverDomain(domain)">
                                     <span editable-text="domain.domain" e-form="domainBtnForm"
                                           onbeforesave="updateDomain(domain, $data)"
                                           ng-click="hoverOrLeaveOverDomain(domain)">
@@ -132,7 +132,18 @@
                                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                     </button>
                                 </td>
-                                <td class="col-xs-5 col-md-5">
+                                <td ng-mouseover="hoverOverUserName(domain)" ng-mouseout="leaveHoverOverUserName(domain)">
+                                    <span editable-text="domain.userName" e-form="userNameBtnForm"
+                                          onbeforesave="updateUserName(domain, $data)"
+                                          ng-click="hoverOrLeaveOverUserName(domain)">
+                                        {{domain.userName}}
+                                    </span>
+                                    <button class="btn btn-info pull-right" ng-click="userNameBtnForm.$show()"
+                                            ng-show="domain.showUserNameEditButton && !userNameBtnForm.$visible">
+                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
                                     <span ng-show="!domain.shownPassword">*******</span>
                                     <span ng-show="domain.shownPassword"
                                           editable-text="domain.decodedPassword" e-form="passwordBtnForm"
@@ -144,7 +155,7 @@
                                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                     </button>
                                 </td>
-                                <td class="col-xs-2 col-md-2">
+                                <td>
                                     <button type="button" class="btn btn-info"
                                             ng-click="showOrHidePassword(domain)" ng-disabled="passwordBtnForm.$visible">
                                         <span class="glyphicon glyphicon-eye-open" aria-hidden="true" ng-show="!domain.shownPassword"></span>
@@ -169,6 +180,12 @@
                                     </div>
                                 </td>
                                 <td>
+                                    <div class="form-group">
+                                        <label for="newUserNameInput" class="sr-only">New User Name</label>
+                                        <input id="newUserNameInput" class="form-control" ng-model="newUserName" placeholder="New User Name"/>
+                                    </div>
+                                </td>
+                                <td>
                                     <div class="form-group" ng-class="newPasswordClass">
                                         <p><label for="newPasswordInput" class="sr-only">New Password</label>
                                         <input id="newPasswordInput" class="form-control" ng-model="newPassword" placeholder="New Password"/></p>
@@ -181,6 +198,7 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td colspan="2">
                                     <button type="button" class="btn btn-info" ng-click="generateRandomPassword()"

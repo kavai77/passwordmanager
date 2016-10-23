@@ -63,9 +63,11 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         }
         var iv = forge.random.getBytesSync(16);
         var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
-        var newDomain = res.PasswordService.store({domain: $scope.newDomain, hex: hex, iv: forge.util.bytesToHex(iv)}, function(){
+        var newDomain = res.PasswordService.store({domain: $scope.newDomain, userName: $scope.newUserName, hex: hex,
+                                                    iv: forge.util.bytesToHex(iv)}, function(){
             $scope.domains.push(newDomain);
             $scope.newDomain = null;
+            $scope.newUserName = null;
             $scope.newPassword = null;
             $scope.serverPassword = null;
         });
@@ -151,6 +153,26 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
     };
     $scope.hoverOrLeaveOverDomain = function(domain) {
         domain.showDomainEditButton = !domain.showDomainEditButton;
+    };
+    $scope.updateUserName = function(domain, data) {
+        if (!data) {
+            return false;
+        }
+        clearMessages();
+        var beforeUpdate = domain.userName;
+        res.PasswordService.changeUserName({id: domain.id, userName: data}, function() {}, function errorCallback() {
+            domain.userName = beforeUpdate;
+        });
+        return true;
+    };
+    $scope.hoverOverUserName = function(domain) {
+        domain.showUserNameEditButton = true;
+    };
+    $scope.leaveHoverOverUserName = function(domain) {
+        domain.showUserNameEditButton = false;
+    };
+    $scope.hoverOrLeaveOverUserName = function(domain) {
+        domain.showUserNameEditButton = !domain.showUserNameEditButton;
     };
     $scope.updatePassword = function(domain, data) {
         if (!data) {

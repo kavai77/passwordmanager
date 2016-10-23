@@ -13,15 +13,17 @@ public class BackupItem {
     @Index
     private Long backupId;
     private String domain;
+    private String userName;
     private String hex;
     private String iv;
 
     public BackupItem() {
     }
 
-    public BackupItem(Long backupId, String domain, String hex, String iv) {
+    public BackupItem(Long backupId, String domain, String userName, String hex, String iv) {
         this.backupId = backupId;
         this.domain = domain;
+        this.userName = userName;
         this.hex = hex;
         this.iv = iv;
     }
@@ -40,6 +42,14 @@ public class BackupItem {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public void setHex(String hex) {

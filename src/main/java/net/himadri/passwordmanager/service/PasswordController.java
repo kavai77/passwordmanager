@@ -30,12 +30,13 @@ public class PasswordController {
     UserController userController;
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
-    public Password store(@RequestParam String domain, @RequestParam String hex, @RequestParam String iv)  {
+    public Password store(@RequestParam String domain, @RequestParam String userName,
+                          @RequestParam String hex, @RequestParam String iv)  {
         hasLength(domain);
         hasLength(hex);
         hasLength(iv);
         String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        Password password = new Password(userId, domain, hex, iv);
+        Password password = new Password(userId, domain, userName, hex, iv);
         ofy().save().entity(password).now();
         return password;
     }
@@ -46,6 +47,15 @@ public class PasswordController {
         notNull(id);
         Password password = getUserPassword(id);
         password.setDomain(domain);
+        ofy().save().entity(password).now();
+        return password;
+    }
+
+    @RequestMapping(value = "/changeUserName", method = RequestMethod.POST)
+    public Password changeUserName(@RequestParam Long id, @RequestParam String userName)  {
+        notNull(id);
+        Password password = getUserPassword(id);
+        password.setUserName(userName);
         ofy().save().entity(password).now();
         return password;
     }
