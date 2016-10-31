@@ -1,6 +1,7 @@
 package net.himadri.passwordmanager.service;
 
-import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.users.UserService;
+import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.dto.BackupData;
 import net.himadri.passwordmanager.entity.Backup;
 import net.himadri.passwordmanager.entity.BackupItem;
@@ -16,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.appengine.api.users.UserServiceFactory.getUserService;
-import static com.googlecode.objectify.ObjectifyService.ofy;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 @RestController
@@ -29,6 +29,12 @@ public class BackupController {
 
     @Autowired
     PasswordController passwordController;
+    
+    @Autowired
+    Objectify ofy;
+
+    @Autowired
+    UserService userService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public BackupData createBackup() {
@@ -36,11 +42,11 @@ public class BackupController {
         Backup backup = new Backup(user.getUserId(), user.getMasterPasswordHash(),
                 user.getIterations(), user.getCipherAlgorithm(), user.getKeyLength(),
                 user.getPbkdf2Algorithm(), new Date());
-        ofy().save().entity(backup).now();
+        ofy.save().entity(backup).now();
 
         List<Password> allPasswords = passwordController.retrieveAllPasswords();
         for (Password password: allPasswords) {
-            ofy().save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getUserName(), password.getHex(), password.getIv()));
+            ofy.save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getUserName(), password.getHex(), password.getIv()));
         }
         return new BackupData(backup.getId(), backup.getBackupDate(), allPasswords.size());
     }
@@ -59,9 +65,9 @@ public class BackupController {
     @RequestMapping("/retrieve")
     public List<BackupData> retrieveAllBackups() {
         List<BackupData> result = new ArrayList<>();
-        String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        for (Backup backup: ofy().load().type(Backup.class).filter("userId", userId)) {
-            int numberOfItems = ofy().load().type(BackupItem.class).filter("backupId", backup.getId()).count();
+        String userId = userService.getCurrentUser().getUserId();
+        for (Backup backup: ofy.load().type(Backup.class).filter("userId", userId)) {
+            int numberOfItems = ofy.load().type(BackupItem.class).filter("backupId", backup.getId()).count();
             result.add(new BackupData(backup.getId(), backup.getBackupDate(), numberOfItems));
         }
         Collections.sort(result, new Comparator<BackupData>() {
@@ -77,9 +83,9 @@ public class BackupController {
     @RequestMapping(value = "/remove", method = RequestMethod.DELETE)
     public void removeBackup(@RequestParam final Long id) {
         Backup backup = getUserBackup(id);
-        ofy().delete().entity(backup);
+        ofy.delete().entity(backup);
         List<BackupItem> backupItems = getAllBackupItems(id);
-        ofy().delete().entities(backupItems);
+        ofy.delete().entities(backupItems);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -91,12 +97,12 @@ public class BackupController {
     private void saveBackupPasswords(Long backupId, RegisteredUser user) {
         List<BackupItem> backupItems = getAllBackupItems(backupId);
         for (BackupItem backupItem: backupItems) {
-            ofy().save().entity(new Password(user.getUserId(), backupItem.getDomain(), backupItem.getUserName(), backupItem.getHex(), backupItem.getIv()));
+            ofy.save().entity(new Password(user.getUserId(), backupItem.getDomain(), backupItem.getUserName(), backupItem.getHex(), backupItem.getIv()));
         }
     }
 
     private List<BackupItem> getAllBackupItems(Long backupId) {
-        return ofy().load().type(BackupItem.class).filter("backupId", backupId).list();
+        return ofy.load().type(BackupItem.class).filter("backupId", backupId).list();
     }
 
     private void updateUserWithBackup(Backup backup, RegisteredUser user) {
@@ -105,11 +111,11 @@ public class BackupController {
         user.setIterations(backup.getIterations());
         user.setKeyLength(backup.getKeyLength());
         user.setPbkdf2Algorithm(backup.getPbkdf2Algorithm());
-        ofy().save().entity(user);
+        ofy.save().entity(user);
     }
 
     private Backup getUserBackup(Long id) {
-        Backup backup = ofy().load().type(Backup.class).id(id).safe();
+        Backup backup = ofy.load().type(Backup.class).id(id).safe();
         isTrue(StringUtils.equals(backup.getUserId(), getUserService().getCurrentUser().getUserId()));
         return backup;
     }

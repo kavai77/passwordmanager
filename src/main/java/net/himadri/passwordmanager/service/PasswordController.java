@@ -1,7 +1,8 @@
 package net.himadri.passwordmanager.service;
 
-import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.users.UserService;
 import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.Password;
 import net.himadri.passwordmanager.entity.RegisteredUser;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.springframework.util.Assert.*;
 
@@ -29,15 +29,21 @@ public class PasswordController {
     @Autowired
     UserController userController;
 
+    @Autowired
+    Objectify ofy;
+
+    @Autowired
+    UserService userService;
+
     @RequestMapping(value = "/store", method = RequestMethod.POST)
     public Password store(@RequestParam String domain, @RequestParam String userName,
                           @RequestParam String hex, @RequestParam String iv)  {
         hasLength(domain);
         hasLength(hex);
         hasLength(iv);
-        String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
+        String userId = userService.getCurrentUser().getUserId();
         Password password = new Password(userId, domain, userName, hex, iv);
-        ofy().save().entity(password).now();
+        ofy.save().entity(password).now();
         return password;
     }
 
@@ -47,7 +53,7 @@ public class PasswordController {
         notNull(id);
         Password password = getUserPassword(id);
         password.setDomain(domain);
-        ofy().save().entity(password).now();
+        ofy.save().entity(password).now();
         return password;
     }
 
@@ -56,7 +62,7 @@ public class PasswordController {
         notNull(id);
         Password password = getUserPassword(id);
         password.setUserName(userName);
-        ofy().save().entity(password).now();
+        ofy.save().entity(password).now();
         return password;
     }
 
@@ -67,7 +73,7 @@ public class PasswordController {
         Password password = getUserPassword(id);
         password.setHex(hex);
         password.setIv(iv);
-        ofy().save().entity(password).now();
+        ofy.save().entity(password).now();
         return password;
     }
 
@@ -75,7 +81,7 @@ public class PasswordController {
     public void deletePassword(@RequestParam Long id) {
         notNull(id);
         Password password = getUserPassword(id);
-        ofy().delete().entity(password).now();
+        ofy.delete().entity(password).now();
     }
 
     @RequestMapping(value = "/changeAllHex", method = RequestMethod.POST)
@@ -100,18 +106,18 @@ public class PasswordController {
         RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
         try {
             userController.register(masterPasswordMd5Hash, iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm);
-            ofy().save().entities(allPasswords);
+            ofy.save().entities(allPasswords);
         } catch (RuntimeException e) {
-            ofy().save().entity(oldRegisteredUser);
-            ofy().save().entities(oldPasswords);
+            ofy.save().entity(oldRegisteredUser);
+            ofy.save().entities(oldPasswords);
             throw e;
         }
     }
 
     @RequestMapping("/retrieve")
     public List<Password> retrieveAllPasswords() {
-        String userId = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-        List<Password> passwords = ofy().load().type(Password.class).filter("userId", userId).order("domain").list();
+        String userId = userService.getCurrentUser().getUserId();
+        List<Password> passwords = ofy.load().type(Password.class).filter("userId", userId).order("domain").list();
         Collections.sort(passwords, new Comparator<Password>() {
             @Override
             public int compare(Password o1, Password o2) {
@@ -123,7 +129,7 @@ public class PasswordController {
 
     public void removeAllPasswords() {
         List<Password> passwords = retrieveAllPasswords();
-        ofy().delete().entities(passwords);
+        ofy.delete().entities(passwords);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -145,8 +151,8 @@ public class PasswordController {
     }
 
     private Password getUserPassword(Long id) {
-        Password password = ofy().load().type(Password.class).id(id).safe();
-        isTrue(StringUtils.equals(password.getUserId(), UserServiceFactory.getUserService().getCurrentUser().getUserId()));
+        Password password = ofy.load().type(Password.class).id(id).safe();
+        isTrue(StringUtils.equals(password.getUserId(), userService.getCurrentUser().getUserId()));
         return password;
     }
 

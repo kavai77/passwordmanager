@@ -2,13 +2,14 @@ package net.himadri.passwordmanager.service;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
+import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
 import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,11 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.SecureRandom;
 import java.util.Date;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 @RestController
 @RequestMapping(value = "/public")
 public class PublicController {
+
+    @Autowired
+    Objectify ofy;
+
+    @Autowired
+    UserService userService;
 
     @RequestMapping(value = "/secureRandom", produces = MediaType.TEXT_PLAIN_VALUE)
     public String createSecureRandom() {
@@ -29,14 +34,13 @@ public class PublicController {
 
     @RequestMapping(value = "/authenticate")
     public UserData authenticate() {
-        UserService userService = UserServiceFactory.getUserService();
         boolean userLoggedIn = userService.isUserLoggedIn();
         if (!userLoggedIn) {
             return UserData.userNotAuthenticatedInstance(userService.createLoginURL("/"));
         } else {
             User user = userService.getCurrentUser();
-            ofy().save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
-            RegisteredUser registeredUser = ofy().load().type(RegisteredUser.class).id(user.getUserId()).now();
+            ofy.save().entity(new AccessLog(user.getUserId(), user.getEmail(), new Date()));
+            RegisteredUser registeredUser = ofy.load().type(RegisteredUser.class).id(user.getUserId()).now();
             UserData.UserSettingsData userSettingsData = retrieveUserSettings(user);
             if (registeredUser != null) {
                 return UserData.userRegisteredInstance(user.getUserId(), user.getNickname(),
@@ -52,10 +56,10 @@ public class PublicController {
     }
 
     private UserData.UserSettingsData retrieveUserSettings(User user) {
-        UserSettings userSettings = ofy().load().type(UserSettings.class).id(user.getUserId()).now();
+        UserSettings userSettings = ofy.load().type(UserSettings.class).id(user.getUserId()).now();
         if (userSettings == null) {
             userSettings = new UserSettings(user.getUserId(), AdminSettings.DEFAULT_USER_PASSWORD_LENGTH, AdminSettings.DEFAULT_USER_TIMEOUT_LENGTH_SECONDS);
-            ofy().save().entity(userSettings);
+            ofy.save().entity(userSettings);
         }
         return new UserData.UserSettingsData(userSettings.getDefaultPasswordLength(),
                 userSettings.getTimeoutLengthSeconds());

@@ -1,7 +1,8 @@
 package net.himadri.passwordmanager.service;
 
 import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.users.UserService;
+import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.dto.RecommendedSettings;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AdminSettings;
@@ -10,13 +11,13 @@ import net.himadri.passwordmanager.entity.UserSettings;
 import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
 import static net.himadri.passwordmanager.entity.AdminSettings.*;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
@@ -26,6 +27,12 @@ import static org.apache.commons.lang3.Validate.notEmpty;
 public class UserController {
     private static final Logger LOG = Logger.getLogger(UserController.class.getName());
 
+    @Autowired
+    Objectify ofy;
+
+    @Autowired
+    UserService userService;
+
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void register(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations,
@@ -33,16 +40,16 @@ public class UserController {
         notEmpty(masterPasswordMd5Hash);
         isTrue(StringUtils.equals(cipherAlgorithm, CIPHER_ALGORITHM));
         isTrue(ArrayUtils.contains(ALLOWED_KEYLENGTH, keyLength));
-        User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        ofy().save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
+        User currentUser = userService.getCurrentUser();
+        ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
                 iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm)).now();
     }
 
     @RequestMapping("/check")
     public void check(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash) {
         notEmpty(masterPasswordMd5Hash);
-        User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        RegisteredUser userId = ofy().load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
+        User currentUser = userService.getCurrentUser();
+        RegisteredUser userId = ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
         if (!StringUtils.equals(masterPasswordMd5Hash, userId.getMasterPasswordHash())){
             throw new NotAuthorizedException();
         }
@@ -58,13 +65,13 @@ public class UserController {
         UserSettings userSettings = new UserSettings(registeredUser.getUserId(),
                 userSettingsData.getDefaultPasswordLength(),
                 userSettingsData.getTimeoutLengthSeconds());
-        ofy().save().entity(userSettings);
+        ofy.save().entity(userSettings);
 
     }
 
     public RegisteredUser getRegisteredUser() {
-        User currentUser = UserServiceFactory.getUserService().getCurrentUser();
-        return ofy().load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
+        User currentUser = userService.getCurrentUser();
+        return ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
