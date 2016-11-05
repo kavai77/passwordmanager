@@ -68,4 +68,43 @@ public class Password {
     public void setIv(String iv) {
         this.iv = iv;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Password password = (Password) o;
+
+        if (id != null ? !id.equals(password.id) : password.id != null) return false;
+        if (userId != null ? !userId.equals(password.userId) : password.userId != null) return false;
+        if (domain != null ? !domain.equals(password.domain) : password.domain != null) return false;
+        if (userName != null ? !userName.equals(password.userName) : password.userName != null) return false;
+        if (hex != null ? !hex.equals(password.hex) : password.hex != null) return false;
+        return iv != null ? iv.equals(password.iv) : password.iv == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (userId != null ? userId.hashCode() : 0);
+        result = 31 * result + (domain != null ? domain.hashCode() : 0);
+        result = 31 * result + (userName != null ? userName.hashCode() : 0);
+        result = 31 * result + (hex != null ? hex.hashCode() : 0);
+        result = 31 * result + (iv != null ? iv.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Password{" +
+                "id=" + id +
+                ", userId='" + userId + '\'' +
+                ", domain='" + domain + '\'' +
+                ", userName='" + userName + '\'' +
+                ", hex='" + hex + '\'' +
+                ", iv='" + iv + '\'' +
+                '}';
+    }
 }
