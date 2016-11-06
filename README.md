@@ -19,8 +19,8 @@ it before password change. So if the new master password is forgotten,
 we can restore the old encrypted data, so it can be decrypted with the old
 master password.
 
-Please not that this project is a Google Cloud Platform based application.
-We use the following library from GCP:
+Please note that this project is a Google Cloud Platform based application.
+We use the following libraries from GCP:
 * Google Users API
 * Datastore
 
