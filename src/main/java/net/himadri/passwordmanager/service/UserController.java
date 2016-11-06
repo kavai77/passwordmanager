@@ -41,6 +41,7 @@ public class UserController {
         isTrue(StringUtils.equals(cipherAlgorithm, CIPHER_ALGORITHM));
         isTrue(ArrayUtils.contains(ALLOWED_KEYLENGTH, keyLength));
         User currentUser = userService.getCurrentUser();
+        isTrue(ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).now() == null);
         ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
                 iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm)).now();
     }

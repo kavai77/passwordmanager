@@ -116,5 +116,32 @@ public class UserData {
         public int getTimeoutLengthSeconds() {
             return timeoutLengthSeconds;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            UserSettingsData that = (UserSettingsData) o;
+
+            if (defaultPasswordLength != that.defaultPasswordLength) return false;
+            return timeoutLengthSeconds == that.timeoutLengthSeconds;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = defaultPasswordLength;
+            result = 31 * result + timeoutLengthSeconds;
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "UserSettingsData{" +
+                    "defaultPasswordLength=" + defaultPasswordLength +
+                    ", timeoutLengthSeconds=" + timeoutLengthSeconds +
+                    '}';
+        }
     }
 }

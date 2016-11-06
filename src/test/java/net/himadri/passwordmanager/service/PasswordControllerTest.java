@@ -1,11 +1,7 @@
 package net.himadri.passwordmanager.service;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.googlecode.objectify.LoadResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.Result;
-import com.googlecode.objectify.cmd.*;
 import net.himadri.passwordmanager.entity.Password;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,11 +18,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -38,28 +33,26 @@ public class PasswordControllerTest {
     private WebApplicationContext wac;
 
     @Autowired
-    Objectify ofy;
+    private Objectify ofy;
 
     @Autowired
-    UserService userService;
+    private MockMvcBehaviour mockMvcBehaviour;
 
     private MockMvc mockMvc;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Before
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-
-        User user = new User("email", "authDomain", "userId");
-        when(userService.getCurrentUser()).thenReturn(user);
-        when(ofy.save()).thenReturn(mock(Saver.class));
-        when(ofy.save().entity(any(Password.class))).thenReturn(mock(Result.class));
-        when(ofy.load()).thenReturn(mock(Loader.class));
-        when(ofy.load().type(Password.class)).thenReturn(mock(LoadType.class));
-        when(ofy.delete()).thenReturn(mock(Deleter.class));
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
     @Test
     public void given_GoodParameters_when_StoringPassword_Then_PasswordIsSaved_And_Returned() throws Exception {
+        // given
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
+
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/store")
@@ -73,7 +66,7 @@ public class PasswordControllerTest {
         Password expectedPassword = new Password("userId", "domain", "userName", "hex", "iv");
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("password", expectedPassword));
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
         verify(ofy.save()).entity(expectedPassword);
     }
@@ -81,7 +74,9 @@ public class PasswordControllerTest {
     @Test
     public void given_GoodParameters_when_ChangingDomain_Then_NewPasswordIsSaved_And_Returned() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("userId", "domain", "userName", "hex", "iv"));
 
@@ -96,7 +91,7 @@ public class PasswordControllerTest {
         Password expectedPassword = new Password("userId", "newDomain", "userName", "hex", "iv");
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("password", expectedPassword));
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
         verify(ofy.save()).entity(expectedPassword);
     }
@@ -104,7 +99,9 @@ public class PasswordControllerTest {
     @Test
     public void given_wrongUserId_when_ChangingDomain_Then_Fails() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("otherUserId", null, null, null, null));
 
@@ -125,7 +122,9 @@ public class PasswordControllerTest {
     @Test
     public void given_GoodParameters_when_ChangingUserName_Then_NewUserNameIsSaved_And_Returned() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("userId", "domain", "userName", "hex", "iv"));
 
@@ -140,7 +139,7 @@ public class PasswordControllerTest {
         Password expectedPassword = new Password("userId", "domain", "newUserName", "hex", "iv");
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("password", expectedPassword));
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
         verify(ofy.save()).entity(expectedPassword);
     }
@@ -148,7 +147,9 @@ public class PasswordControllerTest {
     @Test
     public void given_wrongUserId_when_ChangingUserName_Then_Fails() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("otherUserId", null, null, null, null));
 
@@ -169,7 +170,9 @@ public class PasswordControllerTest {
     @Test
     public void given_GoodParameters_when_ChangingHexAndIv_Then_NewValuesSaved_And_Returned() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("userId", "domain", "userName", "hex", "iv"));
 
@@ -185,7 +188,7 @@ public class PasswordControllerTest {
         Password expectedPassword = new Password("userId", "domain", "userName", "newHex", "newIv");
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("password", expectedPassword));
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
         verify(ofy.save()).entity(expectedPassword);
     }
@@ -193,7 +196,9 @@ public class PasswordControllerTest {
     @Test
     public void given_wrongUserId_when_ChangingHexAndIv_Then_Fails() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("otherUserId", null, null, null, null));
 
@@ -215,10 +220,11 @@ public class PasswordControllerTest {
     @Test
     public void given_GoodParameters_when_DeletingPassword_Then_HttpOk() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifyDeleterIsMocked();
         Password loadedPassword = new Password("userId", "domain", "userName", "hex", "iv");
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(loadedPassword);
-        when(ofy.delete().entity(any(Password.class))).thenReturn(mock(Result.class));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -236,7 +242,9 @@ public class PasswordControllerTest {
     @Test
     public void given_wrongUserId_when_DeletingPassword_Then_Fails() throws Exception {
         // given
-        when(ofy.load().type(Password.class).id(1L)).thenReturn(mock(LoadResult.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenObjectifyDeleterIsMocked();
         when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
                 new Password("otherUserId", null, null, null, null));
 
@@ -256,8 +264,8 @@ public class PasswordControllerTest {
     @Test
     public void when_RetrievingPasswords_Then_PasswordSortedAndReturned() throws Exception {
         // given
-        when(ofy.load().type(Password.class).filter(anyString(), anyString())).thenReturn(mock(Query.class));
-        when(ofy.load().type(Password.class).filter(anyString(), anyString()).order(anyString())).thenReturn(mock(Query.class));
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         Password pwd1 = new Password("userId", "BDomain", "userName", "hex", "iv");
         Password pwd2 = new Password("userId", "aDomain", "userName", "hex", "iv");
         when(ofy.load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
@@ -271,7 +279,7 @@ public class PasswordControllerTest {
         // then
         resultActions
                 .andExpect(status().isOk()).andDo(print())
-                .andExpect(model().attribute("passwordList", Arrays.asList(pwd2, pwd1)));
+                .andExpect(content().json(objectMapper.writeValueAsString(Arrays.asList(pwd2, pwd1))));
 
         verify(ofy.load().type(Password.class)).filter("userId", "userId");
         verify(ofy.load().type(Password.class).filter("userId", "userId")).order("domain");

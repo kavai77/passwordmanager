@@ -76,4 +76,48 @@ public class RegisteredUser {
     public void setPbkdf2Algorithm(String pbkdf2Algorithm) {
         this.pbkdf2Algorithm = pbkdf2Algorithm;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RegisteredUser that = (RegisteredUser) o;
+
+        if (iterations != that.iterations) return false;
+        if (keyLength != that.keyLength) return false;
+        if (userId != null ? !userId.equals(that.userId) : that.userId != null) return false;
+        if (masterPasswordHash != null ? !masterPasswordHash.equals(that.masterPasswordHash) : that.masterPasswordHash != null)
+            return false;
+        if (email != null ? !email.equals(that.email) : that.email != null) return false;
+        if (cipherAlgorithm != null ? !cipherAlgorithm.equals(that.cipherAlgorithm) : that.cipherAlgorithm != null)
+            return false;
+        return pbkdf2Algorithm != null ? pbkdf2Algorithm.equals(that.pbkdf2Algorithm) : that.pbkdf2Algorithm == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userId != null ? userId.hashCode() : 0;
+        result = 31 * result + (masterPasswordHash != null ? masterPasswordHash.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + iterations;
+        result = 31 * result + (cipherAlgorithm != null ? cipherAlgorithm.hashCode() : 0);
+        result = 31 * result + keyLength;
+        result = 31 * result + (pbkdf2Algorithm != null ? pbkdf2Algorithm.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RegisteredUser{" +
+                "userId='" + userId + '\'' +
+                ", masterPasswordHash='" + masterPasswordHash + '\'' +
+                ", email='" + email + '\'' +
+                ", iterations=" + iterations +
+                ", cipherAlgorithm='" + cipherAlgorithm + '\'' +
+                ", keyLength=" + keyLength +
+                ", pbkdf2Algorithm='" + pbkdf2Algorithm + '\'' +
+                '}';
+    }
 }
