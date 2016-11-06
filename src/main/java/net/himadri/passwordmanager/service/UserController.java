@@ -3,9 +3,7 @@ package net.himadri.passwordmanager.service;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.googlecode.objectify.Objectify;
-import net.himadri.passwordmanager.dto.RecommendedSettings;
 import net.himadri.passwordmanager.dto.UserData;
-import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
 import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
@@ -18,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static net.himadri.passwordmanager.entity.AdminSettings.*;
+import static net.himadri.passwordmanager.entity.AdminSettings.ALLOWED_KEYLENGTH;
+import static net.himadri.passwordmanager.entity.AdminSettings.CIPHER_ALGORITHM;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
@@ -54,10 +53,6 @@ public class UserController {
         if (!StringUtils.equals(masterPasswordMd5Hash, userId.getMasterPasswordHash())){
             throw new NotAuthorizedException();
         }
-    }
-    @RequestMapping("/recommendedSettings")
-    public RecommendedSettings getRecommendedSettings() {
-        return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM);
     }
 
     @RequestMapping(value = "/userSettings", method = RequestMethod.POST)

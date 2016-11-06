@@ -1,5 +1,6 @@
 package net.himadri.passwordmanager.service;
 
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
@@ -104,8 +105,10 @@ public class PasswordController {
             isTrue(StringUtils.equals(password.getDomain(), storedPassword.getDomain()));
         }
         RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
+        User currentUser = userService.getCurrentUser();
         try {
-            userController.register(masterPasswordMd5Hash, iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm);
+            ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
+                    iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm));
             ofy.save().entities(allPasswords);
         } catch (RuntimeException e) {
             ofy.save().entity(oldRegisteredUser);
@@ -135,7 +138,7 @@ public class PasswordController {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleIllegalArgumentException(Exception e) {
-        LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage());
+        LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage(), e);
     }
 
     @ExceptionHandler(NullPointerException.class)

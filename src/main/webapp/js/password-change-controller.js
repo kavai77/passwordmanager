@@ -7,7 +7,7 @@ app.controller('ctrl', function ($scope, $resource, $window) {
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.Authenticate.get(function() {
+    $scope.user = res.PublicService.authenticate(function() {
         if (!$scope.user.registered) {
             $window.location = "/";
         }
@@ -30,7 +30,7 @@ app.controller('ctrl', function ($scope, $resource, $window) {
             var masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations,
                                         $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             var domains = res.PasswordService.retrieve(function () {
-                var data = res.UserService.recommendedSettings(function (){
+                var data = res.PublicService.recommendedSettings(function () {
                     var newIterations = data.recommendedIterations;
                     var newPbkdf2Algorithm = data.recommendedPbkdf2Algorithm;
                     var newMasterPasswordHash = md5($scope.newMasterPassword1);

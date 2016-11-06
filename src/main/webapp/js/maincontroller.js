@@ -19,7 +19,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.Authenticate.get();
+    $scope.user = res.PublicService.authenticate();
 
     $scope.showOrHidePassword = function(domain) {
         clearMessages();
@@ -117,7 +117,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         if ($scope.passwordLength == null) {
             $scope.passwordLength = $scope.user.userSettings.defaultPasswordLength;
         }
-        var serverPasswordResource = res.SecureRandom.get(function() {
+        var serverPasswordResource = res.PublicService.secureRandom(function() {
             $scope.serverPassword = serverPasswordResource.value;
             $scope.jsRandomPassword();
         });

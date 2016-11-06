@@ -13,19 +13,16 @@ function initResources($scope, $resource) {
 
     var resource = new Object();
 
-    resource.Authenticate = $resource('/service/public/authenticate', {}, {
-        get: {interceptor: {responseError : defaultServerError}}
+    resource.PublicService = $resource('/service/public/:action', {}, {
+        recommendedSettings: {params: {action: 'recommendedSettings'}, interceptor: {responseError : defaultServerError}},
+        authenticate: {params: {action: 'authenticate'}, interceptor: {responseError : defaultServerError}},
+        secureRandom: {params: {action: 'secureRandom'}, transformResponse: function(data) {return {value: data};}, interceptor: {responseError : defaultServerError}}
     });
 
     resource.UserService = $resource('/service/secure/user/:action', {}, {
-        recommendedSettings: {params: {action: 'recommendedSettings'}, interceptor: {responseError : defaultServerError}},
         checkMd5Hash: {method: 'POST', params: {action: 'check'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
         register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
         updateUserSettings: {method: 'POST', params: {action: 'userSettings'}, interceptor: {responseError : defaultServerError}}
-    });
-
-    resource.SecureRandom = $resource('/service/public/secureRandom', {}, {
-        get: {transformResponse: function(data) {return {value: data};}, interceptor: {responseError : defaultServerError}}
     });
 
     resource.PasswordService = $resource('/service/secure/password/:action', {}, {

@@ -3,6 +3,7 @@ package net.himadri.passwordmanager.service;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.googlecode.objectify.Objectify;
+import net.himadri.passwordmanager.dto.RecommendedSettings;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
 import net.himadri.passwordmanager.entity.AdminSettings;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.SecureRandom;
 import java.util.Date;
+
+import static net.himadri.passwordmanager.entity.AdminSettings.DEFAULT_ITERATIONS;
 
 @RestController
 @RequestMapping(value = "/public")
@@ -54,6 +57,12 @@ public class PublicController {
             }
         }
     }
+
+    @RequestMapping("/recommendedSettings")
+    public RecommendedSettings getRecommendedSettings() {
+        return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM);
+    }
+
 
     private UserData.UserSettingsData retrieveUserSettings(User user) {
         UserSettings userSettings = ofy.load().type(UserSettings.class).id(user.getUserId()).now();

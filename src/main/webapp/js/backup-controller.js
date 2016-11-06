@@ -7,7 +7,7 @@ app.controller('ctrl', function ($scope, $resource, $window) {
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.Authenticate.get(function() {
+    $scope.user = res.PublicService.authenticate(function() {
         if (!$scope.user.registered) {
             $window.location = "/";
         } else {

@@ -7,6 +7,6 @@ app.controller('ctrl', function ($scope, $resource) {
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.Authenticate.get();
+    $scope.user = res.PublicService.authenticate();
 
 });
