@@ -38,3 +38,7 @@ mvn package
 mvn com.google.appengine:appengine-maven-plugin:update
 ```
 *Note: for this step, you do not need to run the previous steps, testing and creating the WAR are performed as automatically.*
+### Running local server
+```
+mvn com.google.appengine:appengine-maven-plugin:devserver
+```
