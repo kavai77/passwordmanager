@@ -103,7 +103,7 @@
                 <h4 class="modal-title">Delete backup</h4>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete the backup taken on <b>{{backupToBeDeleted.backupDate}}</b>?
+                Are you sure you want to delete the backup taken on <b>{{formatDate(backupToBeDeleted.backupDate)}}</b>?
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-primary" ng-click="deleteBackup()">Delete</button>
