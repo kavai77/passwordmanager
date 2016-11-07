@@ -54,7 +54,8 @@ public class UserControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/user/register")
-                        .param("md5Hash", "md5Hash")
+                        .param("masterPasswordHash", "hash")
+                        .param("masterPasswordHashAlgorithm", "hashAlgorithm")
                         .param("iterations", "1000")
                         .param("cipherAlgorithm", "AES-CBC")
                         .param("keyLength", "256")
@@ -62,7 +63,7 @@ public class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON_UTF8));
 
         // then
-        RegisteredUser expectedUser = new RegisteredUser("userId", "md5Hash", "email", 1000, "AES-CBC", 256, "MD5");
+        RegisteredUser expectedUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5");
         resultActions
                 .andExpect(status().isCreated());
 
@@ -79,7 +80,8 @@ public class UserControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/user/register")
-                        .param("md5Hash", "md5Hash")
+                        .param("masterPasswordHash", "hash")
+                        .param("masterPasswordHashAlgorithm", "hashAlgorithm")
                         .param("iterations", "1000")
                         .param("cipherAlgorithm", "AES-CBC")
                         .param("keyLength", "256")
@@ -103,8 +105,8 @@ public class UserControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                post("/secure/user/check")
-                        .param("md5Hash", "md5Hash")
+                post("/secure/user/checkMasterPasswordHash")
+                        .param("masterPasswordHash", "hash")
                         .accept(MediaType.APPLICATION_JSON_UTF8));
 
         // then
@@ -121,8 +123,8 @@ public class UserControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                get("/secure/user/check")
-                        .param("md5Hash", "otherMd5Hash")
+                get("/secure/user/checkMasterPasswordHash")
+                        .param("masterPasswordHash", "otherHash")
                         .accept(MediaType.APPLICATION_JSON_UTF8));
 
         // then
@@ -154,7 +156,7 @@ public class UserControllerTest {
     }
 
     private void givenUserIsRegistered() {
-        RegisteredUser registeredUser = new RegisteredUser("userId", "md5Hash", "email", 1000, "AES-CBC", 256, "MD5");
+        RegisteredUser registeredUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5");
         when(ofy.load().type(RegisteredUser.class).id("userId").now()).thenReturn(registeredUser);
     }
 

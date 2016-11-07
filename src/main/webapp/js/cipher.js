@@ -20,8 +20,14 @@ function decode(encodedHex, key, iv, algorithm) {
     return decipher.output.data;
 }
 
-function md5(text) {
-    var md = forge.md.md5.create();
+function messageDigest(algorithm, text) {
+    var md = null;
+    if (algorithm == "md5") {
+        md = forge.md.md5.create();
+    }
+    if (algorithm == "sha512") {
+        md = forge.md.sha512.create();
+    }
     md.update(text);
     return md.digest().toHex();
 }

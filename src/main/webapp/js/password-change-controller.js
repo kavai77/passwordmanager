@@ -25,15 +25,16 @@ app.controller('ctrl', function ($scope, $resource, $window) {
             $scope.errorMessage = 'The two passwords are not the same!';
             return;
         }
-
-        res.UserService.checkMd5Hash({md5Hash: md5($scope.modelMasterPwd)}, function () {
+        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.modelMasterPwd);
+        res.UserService.checkMasterPasswordHash({masterPasswordHash: hash}, function () {
             var masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations,
                                         $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             var domains = res.PasswordService.retrieve(function () {
                 var data = res.PublicService.recommendedSettings(function () {
                     var newIterations = data.recommendedIterations;
                     var newPbkdf2Algorithm = data.recommendedPbkdf2Algorithm;
-                    var newMasterPasswordHash = md5($scope.newMasterPassword1);
+                    var newMasterPasswordHashAlgorithm = data.recommendedMasterPasswordHashAlgorithm;
+                    var newMasterPasswordHash = messageDigest(newMasterPasswordHashAlgorithm, $scope.newMasterPassword1);
                     var newMasterKey = deriveKey($scope.newMasterPassword1, $scope.user.userId, newIterations,
                                                     $scope.newKeyLength, newPbkdf2Algorithm);
                     for (var i = 0; i < domains.length; i++) {
@@ -44,10 +45,16 @@ app.controller('ctrl', function ($scope, $resource, $window) {
                         domain.iv = forge.util.bytesToHex(newIv);
                         domain.hex = encode(decodedPassword, newMasterKey, newIv, $scope.user.cipherAlgorithm);
                     }
-                    res.PasswordService.changeAllHex({md5Hash: newMasterPasswordHash, iterations: newIterations,
-                        cipherAlgorithm: $scope.user.cipherAlgorithm, keyLength: $scope.newKeyLength,
-                        pbkdf2Algorithm: newPbkdf2Algorithm}, domains, function() {
-                        $scope.successMessage = "Master Password successfully changed";
+                    res.PasswordService.changeAllHex({
+                            masterPasswordHash: newMasterPasswordHash,
+                            masterPasswordHashAlgorithm: newMasterPasswordHashAlgorithm,
+                            iterations: newIterations,
+                            cipherAlgorithm: $scope.user.cipherAlgorithm,
+                            keyLength: $scope.newKeyLength,
+                            pbkdf2Algorithm: newPbkdf2Algorithm
+                        },
+                        domains, function() {
+                            $scope.successMessage = "Master Password successfully changed";
                     });
                 });
             });

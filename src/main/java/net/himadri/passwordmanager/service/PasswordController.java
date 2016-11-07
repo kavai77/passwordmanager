@@ -86,12 +86,14 @@ public class PasswordController {
     }
 
     @RequestMapping(value = "/changeAllHex", method = RequestMethod.POST)
-    public void changeAllHex(@RequestParam(value = "md5Hash") final String masterPasswordMd5Hash,
+    public void changeAllHex(@RequestParam final String masterPasswordHash,
+                             @RequestParam final String masterPasswordHashAlgorithm,
                              @RequestParam final int iterations,
                              @RequestParam String cipherAlgorithm, @RequestParam int keyLength,
                              @RequestParam String pbkdf2Algorithm,
                              @RequestBody final List<Password> allPasswords) {
-        hasText(masterPasswordMd5Hash);
+        hasText(masterPasswordHash);
+        hasText(masterPasswordHashAlgorithm);
         isTrue(iterations > 0);
         notNull(allPasswords);
         isTrue(StringUtils.equals(cipherAlgorithm, AdminSettings.CIPHER_ALGORITHM));
@@ -107,7 +109,8 @@ public class PasswordController {
         RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
         User currentUser = userService.getCurrentUser();
         try {
-            ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
+            ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordHash,
+                    masterPasswordHashAlgorithm, currentUser.getEmail(),
                     iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm));
             ofy.save().entities(allPasswords);
         } catch (RuntimeException e) {

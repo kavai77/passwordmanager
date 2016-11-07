@@ -41,14 +41,14 @@ public class BackupController {
         RegisteredUser user = userController.getRegisteredUser();
         Backup backup = new Backup(user.getUserId(), user.getMasterPasswordHash(),
                 user.getIterations(), user.getCipherAlgorithm(), user.getKeyLength(),
-                user.getPbkdf2Algorithm(), new Date());
+                user.getPbkdf2Algorithm(), user.getMasterPasswordHashAlgorithm(), new Date());
         ofy.save().entity(backup).now();
 
         List<Password> allPasswords = passwordController.retrieveAllPasswords();
         for (Password password: allPasswords) {
             ofy.save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getUserName(), password.getHex(), password.getIv()));
         }
-        return new BackupData(backup.getId(), backup.getBackupDate(), allPasswords.size());
+        return new BackupData(backup.getId(), backup.getBackupDate().getTime(), allPasswords.size(), backup.getMasterPasswordHashAlgorithm());
     }
 
 
@@ -68,7 +68,7 @@ public class BackupController {
         String userId = userService.getCurrentUser().getUserId();
         for (Backup backup: ofy.load().type(Backup.class).filter("userId", userId)) {
             int numberOfItems = ofy.load().type(BackupItem.class).filter("backupId", backup.getId()).count();
-            result.add(new BackupData(backup.getId(), backup.getBackupDate(), numberOfItems));
+            result.add(new BackupData(backup.getId(), backup.getBackupDate().getTime(), numberOfItems, backup.getMasterPasswordHashAlgorithm()));
         }
         Collections.sort(result, new Comparator<BackupData>() {
             @Override

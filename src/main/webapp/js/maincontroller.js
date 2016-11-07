@@ -77,7 +77,8 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.errorMessage = 'Please provide your Master Password!';
             return;
         }
-        res.UserService.checkMd5Hash({md5Hash: md5($scope.modelMasterPwd)}, function successCallback() {
+        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.modelMasterPwd);
+        res.UserService.checkMasterPasswordHash({masterPasswordHash: hash}, function successCallback() {
             clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
@@ -104,8 +105,10 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             return;
         }
         clearMessages();
+        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.newMasterPassword1);
         res.UserService.register({
-            md5Hash: md5($scope.newMasterPassword1),
+            masterPasswordHash: hash,
+            masterPasswordHashAlgorithm: $scope.user.masterPasswordHashAlgorithm,
             iterations: $scope.user.iterations,
             cipherAlgorithm: $scope.user.cipherAlgorithm,
             keyLength: $scope.user.keyLength,

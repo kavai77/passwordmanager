@@ -49,7 +49,7 @@
                     </thead>
                     <tbody>
                     <tr ng-repeat="backup in backups">
-                        <td>{{backup.backupDate}}</td>
+                        <td>{{formatDate(backup.backupDate)}}</td>
                         <td>{{backup.numberOfPasswords}}</td>
                         <td>
                             <button class="btn btn-info" ng-click="prepareBackup(backup)"
@@ -81,7 +81,7 @@
                 <h4 class="modal-title">Restore backup</h4>
             </div>
             <div class="modal-body">
-                Are you sure you want to restore this backup taken on <b>{{backupToBeRestored.backupDate}}</b>? All your stored passwords will be overwritten!
+                Are you sure you want to restore this backup taken on <b>{{formatDate(backupToBeRestored.backupDate)}}</b>? All your stored passwords will be overwritten!
                 <div class="form-group">
                     <label for="backupMasterPwdInput" class="sr-only">Backup's Master Password</label>
                     <input id="backupMasterPwdInput" class="form-control" ng-model="backupMasterPwd" type="password"

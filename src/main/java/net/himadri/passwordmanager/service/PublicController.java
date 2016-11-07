@@ -49,6 +49,7 @@ public class PublicController {
                 return UserData.userRegisteredInstance(user.getUserId(), user.getNickname(),
                         userService.createLogoutURL("/"),
                         registeredUser.getIterations(), registeredUser.getCipherAlgorithm(),
+                        registeredUser.getMasterPasswordHashAlgorithm(),
                         registeredUser.getKeyLength(), registeredUser.getPbkdf2Algorithm(),
                         userSettingsData);
             } else {
@@ -60,7 +61,7 @@ public class PublicController {
 
     @RequestMapping("/recommendedSettings")
     public RecommendedSettings getRecommendedSettings() {
-        return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM);
+        return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM, AdminSettings.DEFAULT_HASH_ALGORITHM);
     }
 
 

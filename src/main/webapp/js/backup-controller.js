@@ -22,6 +22,10 @@ app.controller('ctrl', function ($scope, $resource, $window) {
         });
     };
 
+    $scope.formatDate = function (backupDate) {
+        return new Date(backupDate).toLocaleString();
+    };
+
     $scope.prepareBackup = function (backup) {
         $scope.backupToBeRestored = backup;
     };
@@ -32,7 +36,11 @@ app.controller('ctrl', function ($scope, $resource, $window) {
 
     $scope.restoreBackup = function () {
         clearMessages();
-        res.BackupService.restore({id: $scope.backupToBeRestored.id, masterPasswordHash: md5($scope.backupMasterPwd)},
+        var hash = messageDigest($scope.backupToBeRestored.masterPasswordHashAlgorithm, $scope.backupMasterPwd);
+        res.BackupService.restore({
+            id: $scope.backupToBeRestored.id,
+            masterPasswordHash: hash
+        },
         function successCallback(response){
             $scope.successMessage = "All passwords successfully restored";
         }, function errorCallback(response) {

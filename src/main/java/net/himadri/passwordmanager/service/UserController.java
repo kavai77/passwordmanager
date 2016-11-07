@@ -34,23 +34,28 @@ public class UserController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash, @RequestParam int iterations,
-                         @RequestParam String cipherAlgorithm, @RequestParam int keyLength, @RequestParam String pbkdf2Algorithm) {
-        notEmpty(masterPasswordMd5Hash);
+    public void register(@RequestParam String masterPasswordHash,
+                         @RequestParam String masterPasswordHashAlgorithm,
+                         @RequestParam int iterations,
+                         @RequestParam String cipherAlgorithm,
+                         @RequestParam int keyLength,
+                         @RequestParam String pbkdf2Algorithm) {
+        notEmpty(masterPasswordHash);
+        notEmpty(masterPasswordHashAlgorithm);
         isTrue(StringUtils.equals(cipherAlgorithm, CIPHER_ALGORITHM));
         isTrue(ArrayUtils.contains(ALLOWED_KEYLENGTH, keyLength));
         User currentUser = userService.getCurrentUser();
         isTrue(ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).now() == null);
-        ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordMd5Hash, currentUser.getEmail(),
+        ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordHash, masterPasswordHashAlgorithm, currentUser.getEmail(),
                 iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm)).now();
     }
 
-    @RequestMapping("/check")
-    public void check(@RequestParam(value = "md5Hash") String masterPasswordMd5Hash) {
-        notEmpty(masterPasswordMd5Hash);
+    @RequestMapping("/checkMasterPasswordHash")
+    public void checkMasterPasswordHash(String masterPasswordHash) {
+        notEmpty(masterPasswordHash);
         User currentUser = userService.getCurrentUser();
         RegisteredUser userId = ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
-        if (!StringUtils.equals(masterPasswordMd5Hash, userId.getMasterPasswordHash())){
+        if (!StringUtils.equals(masterPasswordHash, userId.getMasterPasswordHash())){
             throw new NotAuthorizedException();
         }
     }

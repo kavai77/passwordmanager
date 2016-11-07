@@ -9,6 +9,7 @@ public class RegisteredUser {
     @Id
     private String userId;
     private String masterPasswordHash;
+    private String masterPasswordHashAlgorithm;
     private String email;
     private int iterations;
     private String cipherAlgorithm;
@@ -18,10 +19,12 @@ public class RegisteredUser {
     public RegisteredUser() {
     }
 
-    public RegisteredUser(String userId, String masterPasswordHash, String email, int iterations, String cipherAlgorithm,
+    public RegisteredUser(String userId, String masterPasswordHash, String masterPasswordHashAlgorithm,
+                          String email, int iterations, String cipherAlgorithm,
                           int keyLength, String pbkdf2Algorithm) {
         this.userId = userId;
         this.masterPasswordHash = masterPasswordHash;
+        this.masterPasswordHashAlgorithm = masterPasswordHashAlgorithm;
         this.email = email;
         this.iterations = iterations;
         this.cipherAlgorithm = cipherAlgorithm;
@@ -43,6 +46,14 @@ public class RegisteredUser {
 
     public void setMasterPasswordHash(String masterPasswordHash) {
         this.masterPasswordHash = masterPasswordHash;
+    }
+
+    public String getMasterPasswordHashAlgorithm() {
+        return masterPasswordHashAlgorithm;
+    }
+
+    public void setMasterPasswordHashAlgorithm(String masterPasswordHashAlgorithm) {
+        this.masterPasswordHashAlgorithm = masterPasswordHashAlgorithm;
     }
 
     public int getIterations() {
@@ -89,6 +100,8 @@ public class RegisteredUser {
         if (userId != null ? !userId.equals(that.userId) : that.userId != null) return false;
         if (masterPasswordHash != null ? !masterPasswordHash.equals(that.masterPasswordHash) : that.masterPasswordHash != null)
             return false;
+        if (masterPasswordHashAlgorithm != null ? !masterPasswordHashAlgorithm.equals(that.masterPasswordHashAlgorithm) : that.masterPasswordHashAlgorithm != null)
+            return false;
         if (email != null ? !email.equals(that.email) : that.email != null) return false;
         if (cipherAlgorithm != null ? !cipherAlgorithm.equals(that.cipherAlgorithm) : that.cipherAlgorithm != null)
             return false;
@@ -100,6 +113,7 @@ public class RegisteredUser {
     public int hashCode() {
         int result = userId != null ? userId.hashCode() : 0;
         result = 31 * result + (masterPasswordHash != null ? masterPasswordHash.hashCode() : 0);
+        result = 31 * result + (masterPasswordHashAlgorithm != null ? masterPasswordHashAlgorithm.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + iterations;
         result = 31 * result + (cipherAlgorithm != null ? cipherAlgorithm.hashCode() : 0);
@@ -113,6 +127,7 @@ public class RegisteredUser {
         return "RegisteredUser{" +
                 "userId='" + userId + '\'' +
                 ", masterPasswordHash='" + masterPasswordHash + '\'' +
+                ", masterPasswordHashAlgorithm='" + masterPasswordHashAlgorithm + '\'' +
                 ", email='" + email + '\'' +
                 ", iterations=" + iterations +
                 ", cipherAlgorithm='" + cipherAlgorithm + '\'' +

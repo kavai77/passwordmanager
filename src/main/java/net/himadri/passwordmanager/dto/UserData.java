@@ -14,12 +14,13 @@ public class UserData {
     private final boolean registered;
     private final int iterations;
     private final String cipherAlgorithm;
+    private final String masterPasswordHashAlgorithm;
     private final int keyLength;
     private final String pbkdf2Algorithm;
     private final UserSettingsData userSettings;
 
     private UserData(String userId, boolean authenticated, String nickName, String loginUrl, String logoutURL, boolean registered, int iterations,
-                     String cipherAlgorithm, int keyLength, String pbkdf2Algorithm, UserSettingsData userSettings) {
+                     String cipherAlgorithm, String masterPasswordHashAlgorithm, int keyLength, String pbkdf2Algorithm, UserSettingsData userSettings) {
         this.userId = userId;
         this.authenticated = authenticated;
         this.nickName = nickName;
@@ -28,6 +29,7 @@ public class UserData {
         this.registered = registered;
         this.iterations = iterations;
         this.cipherAlgorithm = cipherAlgorithm;
+        this.masterPasswordHashAlgorithm = masterPasswordHashAlgorithm;
         this.keyLength = keyLength;
         this.pbkdf2Algorithm = pbkdf2Algorithm;
         this.userSettings = userSettings;
@@ -35,22 +37,23 @@ public class UserData {
 
     public static UserData userRegisteredInstance(String userId, String nickName,
                                                   String logoutURL, int iterations,
-                                                  String cipherAlgorithm, int keyLength, String pbkdf2Algorithm,
+                                                  String cipherAlgorithm, String masterPasswordHashAlgorithm,
+                                                  int keyLength, String pbkdf2Algorithm,
                                                   UserSettingsData userSettings) {
-        return new UserData(userId, true, nickName, null, logoutURL, true, iterations, cipherAlgorithm, keyLength,
+        return new UserData(userId, true, nickName, null, logoutURL, true, iterations, cipherAlgorithm, masterPasswordHashAlgorithm, keyLength,
                 pbkdf2Algorithm, userSettings);
     }
 
     public static UserData userUnregisteredInstance(String userId, String nickName, String logoutURL,
                                                      UserSettingsData userSettings) {
-        return new UserData(userId, true, nickName, null, logoutURL, false, DEFAULT_ITERATIONS, CIPHER_ALGORITHM, DEFAULT_KEYLENGTH,
+        return new UserData(userId, true, nickName, null, logoutURL, false, DEFAULT_ITERATIONS, CIPHER_ALGORITHM, DEFAULT_HASH_ALGORITHM, DEFAULT_KEYLENGTH,
                 DEFAULT_PBKDF2_ALGORITHM, userSettings);
     }
 
 
 
     public static UserData userNotAuthenticatedInstance(String loginUrl) {
-        return new UserData(null, false, null, loginUrl, null, false, 0, null,0, null, null);
+        return new UserData(null, false, null, loginUrl, null, false, 0, null, null, 0, null, null);
     }
 
     public String getUserId() {
@@ -83,6 +86,10 @@ public class UserData {
 
     public String getCipherAlgorithm() {
         return cipherAlgorithm;
+    }
+
+    public String getMasterPasswordHashAlgorithm() {
+        return masterPasswordHashAlgorithm;
     }
 
     public int getKeyLength() {
