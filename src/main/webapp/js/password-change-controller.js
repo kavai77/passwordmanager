@@ -25,7 +25,7 @@ app.controller('ctrl', function ($scope, $resource, $window) {
             $scope.errorMessage = 'The two passwords are not the same!';
             return;
         }
-        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.modelMasterPwd);
+        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.user.userId, $scope.modelMasterPwd);
         res.UserService.checkMasterPasswordHash({masterPasswordHash: hash}, function () {
             var masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations,
                                         $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
@@ -34,7 +34,7 @@ app.controller('ctrl', function ($scope, $resource, $window) {
                     var newIterations = data.recommendedIterations;
                     var newPbkdf2Algorithm = data.recommendedPbkdf2Algorithm;
                     var newMasterPasswordHashAlgorithm = data.recommendedMasterPasswordHashAlgorithm;
-                    var newMasterPasswordHash = messageDigest(newMasterPasswordHashAlgorithm, $scope.newMasterPassword1);
+                    var newMasterPasswordHash = messageDigest(newMasterPasswordHashAlgorithm, $scope.user.userId, $scope.newMasterPassword1);
                     var newMasterKey = deriveKey($scope.newMasterPassword1, $scope.user.userId, newIterations,
                                                     $scope.newKeyLength, newPbkdf2Algorithm);
                     for (var i = 0; i < domains.length; i++) {

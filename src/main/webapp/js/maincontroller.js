@@ -77,7 +77,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.errorMessage = 'Please provide your Master Password!';
             return;
         }
-        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.modelMasterPwd);
+        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.user.userId, $scope.modelMasterPwd);
         res.UserService.checkMasterPasswordHash({masterPasswordHash: hash}, function successCallback() {
             clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
@@ -105,7 +105,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             return;
         }
         clearMessages();
-        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.newMasterPassword1);
+        var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.user.userId, $scope.newMasterPassword1);
         res.UserService.register({
             masterPasswordHash: hash,
             masterPasswordHashAlgorithm: $scope.user.masterPasswordHashAlgorithm,

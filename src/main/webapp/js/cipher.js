@@ -20,13 +20,17 @@ function decode(encodedHex, key, iv, algorithm) {
     return decipher.output.data;
 }
 
-function messageDigest(algorithm, text) {
+function messageDigest(algorithm, userId, text) {
     var md = null;
     if (algorithm == "md5") {
         md = forge.md.md5.create();
     }
     if (algorithm == "sha512") {
         md = forge.md.sha512.create();
+    }
+    if (algorithm == "hmac-sha256") {
+        var md = forge.hmac.create();
+        md.start('sha256', userId);
     }
     md.update(text);
     return md.digest().toHex();

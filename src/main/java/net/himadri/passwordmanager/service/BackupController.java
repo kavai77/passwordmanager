@@ -111,6 +111,7 @@ public class BackupController {
         user.setIterations(backup.getIterations());
         user.setKeyLength(backup.getKeyLength());
         user.setPbkdf2Algorithm(backup.getPbkdf2Algorithm());
+        user.setMasterPasswordHashAlgorithm(backup.getMasterPasswordHashAlgorithm());
         ofy.save().entity(user);
     }
 

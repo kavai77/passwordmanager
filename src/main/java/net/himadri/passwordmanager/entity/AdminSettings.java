@@ -7,7 +7,7 @@ public class AdminSettings {
     public static final int DEFAULT_KEYLENGTH = 192;
     public static final int[] ALLOWED_KEYLENGTH = {128, 192, 256};
     public static final String DEFAULT_PBKDF2_ALGORITHM = "md5";
-    public static final String DEFAULT_HASH_ALGORITHM = "sha512";
+    public static final String DEFAULT_HASH_ALGORITHM = "hmac-sha256";
     public static final int DEFAULT_USER_PASSWORD_LENGTH = 27;
     public static final int DEFAULT_USER_TIMEOUT_LENGTH_SECONDS = 420;
 }

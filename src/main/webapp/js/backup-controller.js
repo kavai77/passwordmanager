@@ -36,7 +36,8 @@ app.controller('ctrl', function ($scope, $resource, $window) {
 
     $scope.restoreBackup = function () {
         clearMessages();
-        var hash = messageDigest($scope.backupToBeRestored.masterPasswordHashAlgorithm, $scope.backupMasterPwd);
+        var hash = messageDigest($scope.backupToBeRestored.masterPasswordHashAlgorithm,
+            $scope.user.userId, $scope.backupMasterPwd);
         res.BackupService.restore({
             id: $scope.backupToBeRestored.id,
             masterPasswordHash: hash
