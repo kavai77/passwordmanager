@@ -6,7 +6,6 @@ import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
-import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,16 +49,6 @@ public class UserController {
                 iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm)).now();
     }
 
-    @RequestMapping("/checkMasterPasswordHash")
-    public void checkMasterPasswordHash(String masterPasswordHash) {
-        notEmpty(masterPasswordHash);
-        User currentUser = userService.getCurrentUser();
-        RegisteredUser userId = ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
-        if (!StringUtils.equals(masterPasswordHash, userId.getMasterPasswordHash())){
-            throw new NotAuthorizedException();
-        }
-    }
-
     @RequestMapping(value = "/userSettings", method = RequestMethod.POST)
     public void updateUserSettings(@RequestBody UserData.UserSettingsData userSettingsData) {
         RegisteredUser registeredUser = getRegisteredUser();
@@ -80,11 +69,4 @@ public class UserController {
     public void handleIllegalArgumentException(Exception e) {
         LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage());
     }
-
-    @ExceptionHandler(NotAuthorizedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public void handleNotAuthorizedException(Exception e) {
-        LOG.log(Level.SEVERE, "UNAUTHORIZED: " + e.getMessage());
-    }
-
 }

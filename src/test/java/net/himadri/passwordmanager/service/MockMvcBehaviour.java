@@ -6,6 +6,7 @@ import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Result;
 import com.googlecode.objectify.cmd.*;
+import net.himadri.passwordmanager.entity.RegisteredUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,12 @@ public class MockMvcBehaviour {
         when(ofy.delete()).thenReturn(mock(Deleter.class));
         when(ofy.delete().entity(any())).thenReturn(mock(Result.class));
     }
+
+    public void givenUserIsRegistered() {
+        RegisteredUser registeredUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5");
+        when(ofy.load().type(RegisteredUser.class).id("userId").now()).thenReturn(registeredUser);
+    }
+
 
 
 

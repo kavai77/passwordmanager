@@ -1,25 +1,25 @@
 package net.himadri.passwordmanager.service;
 
+import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
-import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.Password;
 import net.himadri.passwordmanager.entity.RegisteredUser;
+import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notEmpty;
 import static org.springframework.util.Assert.*;
 
 @RestController
@@ -98,16 +98,21 @@ public class PasswordController {
         notNull(allPasswords);
         isTrue(StringUtils.equals(cipherAlgorithm, AdminSettings.CIPHER_ALGORITHM));
         isTrue(ArrayUtils.contains(AdminSettings.ALLOWED_KEYLENGTH, keyLength));
-        List<Password> oldPasswords = retrieveAllPasswords();
+        User currentUser = userService.getCurrentUser();
+        List<Password> oldPasswords = ofy.load().type(Password.class).filter("userId", currentUser.getUserId()).list();
+        Map<Long, Password> oldPasswordIdMap = new HashMap<>();
+        for (Password password: oldPasswords) {
+            oldPasswordIdMap.put(password.getId(), password);
+        }
         isTrue(allPasswords.size() == oldPasswords.size());
         for (Password password: allPasswords) {
-            Password storedPassword = searchUserPassword(oldPasswords, password.getId());
+            Password storedPassword = oldPasswordIdMap.get(password.getId());
+            notNull(storedPassword);
             isTrue(password.getId().equals(storedPassword.getId()));
             isTrue(StringUtils.equals(password.getUserId(), storedPassword.getUserId()));
             isTrue(StringUtils.equals(password.getDomain(), storedPassword.getDomain()));
         }
         RegisteredUser oldRegisteredUser = userController.getRegisteredUser();
-        User currentUser = userService.getCurrentUser();
         try {
             ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordHash,
                     masterPasswordHashAlgorithm, currentUser.getEmail(),
@@ -121,9 +126,13 @@ public class PasswordController {
     }
 
     @RequestMapping("/retrieve")
-    public List<Password> retrieveAllPasswords() {
-        String userId = userService.getCurrentUser().getUserId();
-        List<Password> passwords = ofy.load().type(Password.class).filter("userId", userId).order("domain").list();
+    public List<Password> retrieveAllPasswords(@RequestParam String masterPasswordHash) {
+        notEmpty(masterPasswordHash);
+        RegisteredUser registeredUser = userController.getRegisteredUser();
+        if (!StringUtils.equals(masterPasswordHash, registeredUser.getMasterPasswordHash())){
+            throw new NotAuthorizedException();
+        }
+        List<Password> passwords = ofy.load().type(Password.class).filter("userId", registeredUser.getUserId()).order("domain").list();
         Collections.sort(passwords, new Comparator<Password>() {
             @Override
             public int compare(Password o1, Password o2) {
@@ -134,7 +143,8 @@ public class PasswordController {
     }
 
     public void removeAllPasswords() {
-        List<Password> passwords = retrieveAllPasswords();
+        String userId = userService.getCurrentUser().getUserId();
+        QueryResultIterator<Password> passwords = ofy.load().type(Password.class).filter("userId", userId).iterator();
         ofy.delete().entities(passwords);
     }
 
@@ -150,24 +160,15 @@ public class PasswordController {
         LOG.log(Level.SEVERE, "BAD_REQUEST", e);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public void handleNotFoundException(Exception e) {
-        LOG.log(Level.SEVERE, "BAD_REQUEST: " + e.getMessage());
+    @ExceptionHandler(NotAuthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public void handleNotAuthorizedException(Exception e) {
+        LOG.log(Level.SEVERE, "UNAUTHORIZED: " + e.getMessage());
     }
 
     private Password getUserPassword(Long id) {
         Password password = ofy.load().type(Password.class).id(id).safe();
         isTrue(StringUtils.equals(password.getUserId(), userService.getCurrentUser().getUserId()));
         return password;
-    }
-
-    private Password searchUserPassword(List<Password> passwords, Long id) {
-        for (Password password: passwords) {
-            if (password.getId().equals(id)) {
-                return password;
-            }
-        }
-        throw new NotFoundException();
     }
 }

@@ -78,12 +78,10 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             return;
         }
         var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.user.userId, $scope.modelMasterPwd);
-        res.UserService.checkMasterPasswordHash({masterPasswordHash: hash}, function successCallback() {
+        $scope.domains = res.PasswordService.retrieve({masterPasswordHash: hash}, function successCallback() {
             clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
-
-            $scope.domains = res.PasswordService.retrieve();
 
             $interval(function() {
                 $scope.timeLockExpires = $scope.lastAction + $scope.user.userSettings.timeoutLengthSeconds * 1000 - new Date().getTime();

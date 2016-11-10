@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -262,10 +263,12 @@ public class PasswordControllerTest {
     }
 
     @Test
-    public void when_RetrievingPasswords_Then_PasswordSortedAndReturned() throws Exception {
+    public void given_GoodParameters_when_RetrievingPasswords_Then_PasswordSortedAndReturned() throws Exception {
         // given
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenUserIsRegistered();
+
         Password pwd1 = new Password("userId", "BDomain", "userName", "hex", "iv");
         Password pwd2 = new Password("userId", "aDomain", "userName", "hex", "iv");
         when(ofy.load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
@@ -274,6 +277,7 @@ public class PasswordControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/retrieve")
+                        .param("masterPasswordHash", "hash")
                         .accept(MediaType.APPLICATION_JSON_UTF8));
 
         // then
@@ -284,5 +288,24 @@ public class PasswordControllerTest {
         verify(ofy.load().type(Password.class)).filter("userId", "userId");
         verify(ofy.load().type(Password.class).filter("userId", "userId")).order("domain");
     }
+
+    @Test
+    public void given_HashMismatch_when_RetrievingPassword_Then_Failure() throws Exception {
+        // given
+        mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
+        mockMvcBehaviour.givenUserIsRegistered();
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                get("/secure/password/retrieve")
+                        .param("masterPasswordHash", "otherHash")
+                        .accept(MediaType.APPLICATION_JSON_UTF8));
+
+        // then
+        resultActions
+                .andExpect(status().is4xxClientError());
+    }
+
 
 }

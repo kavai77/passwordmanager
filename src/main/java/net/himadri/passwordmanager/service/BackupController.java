@@ -44,7 +44,7 @@ public class BackupController {
                 user.getPbkdf2Algorithm(), user.getMasterPasswordHashAlgorithm(), new Date());
         ofy.save().entity(backup).now();
 
-        List<Password> allPasswords = passwordController.retrieveAllPasswords();
+        List<Password> allPasswords = ofy.load().type(Password.class).filter("userId", user.getUserId()).list();
         for (Password password: allPasswords) {
             ofy.save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getUserName(), password.getHex(), password.getIv()));
         }

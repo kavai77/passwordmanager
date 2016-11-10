@@ -20,7 +20,6 @@ function initResources($scope, $resource) {
     });
 
     resource.UserService = $resource('/service/secure/user/:action', {}, {
-        checkMasterPasswordHash: {method: 'POST', params: {action: 'checkMasterPasswordHash'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform},
         register: {method: 'POST', params: {action: 'register'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
         updateUserSettings: {method: 'POST', params: {action: 'userSettings'}, interceptor: {responseError : defaultServerError}}
     });
@@ -32,7 +31,7 @@ function initResources($scope, $resource) {
         changeHex: {method: 'POST', params: {action: 'changeHex'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
         changeAllHex: {method: 'POST', params: {action: 'changeAllHex'}, interceptor: {responseError : defaultServerError}},
         deletePassword: {method: 'POST', params: {action: 'deletePassword'}, headers: {'Content-Type': urlEncoded}, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
-        retrieve: {params: {action: 'retrieve'}, isArray:true, interceptor: {responseError : defaultServerError}}
+        retrieve: {params: {action: 'retrieve'}, isArray:true}
     });
 
     resource.BackupService = $resource('/service/secure/backup/:action', {}, {

@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,7 +74,7 @@ public class UserControllerTest {
         // given
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        givenUserIsRegistered();
+        mockMvcBehaviour.givenUserIsRegistered();
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -95,50 +94,13 @@ public class UserControllerTest {
         verifyNoMoreInteractions(ofy.save());
     }
 
-
-    @Test
-    public void given_GoodParameters_when_CheckingHash_Then_Success() throws Exception {
-        // given
-        mockMvcBehaviour.givenUserIsAuthenticated();
-        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
-        givenUserIsRegistered();
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/secure/user/checkMasterPasswordHash")
-                        .param("masterPasswordHash", "hash")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
-
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void given_HashMismatch_when_CheckingHash_Then_Failure() throws Exception {
-        // given
-        mockMvcBehaviour.givenUserIsAuthenticated();
-        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
-        givenUserIsRegistered();
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                get("/secure/user/checkMasterPasswordHash")
-                        .param("masterPasswordHash", "otherHash")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
-
-        // then
-        resultActions
-                .andExpect(status().is4xxClientError());
-    }
-
     @Test
     public void given_GoodParamters_when_SavingUserSettings_Then_Success() throws Exception {
         // given
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        givenUserIsRegistered();
+        mockMvcBehaviour.givenUserIsRegistered();
 
         // when
         UserData.UserSettingsData userSettingsData = new UserData.UserSettingsData(1, 2);
@@ -153,11 +115,6 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(ofy.save()).entity(new UserSettings("userId", 1, 2));
-    }
-
-    private void givenUserIsRegistered() {
-        RegisteredUser registeredUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5");
-        when(ofy.load().type(RegisteredUser.class).id("userId").now()).thenReturn(registeredUser);
     }
 
     private void givenUserIsNotRegistered() {
