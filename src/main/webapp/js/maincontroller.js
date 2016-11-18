@@ -63,7 +63,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         var newDomain = res.PasswordService.store({domain: $scope.newDomain, userName: $scope.newUserName, hex: hex,
                                                     iv: forge.util.bytesToHex(iv)}, function(){
-            $scope.domains.push(newDomain);
+            $scope.domains.unshift(newDomain);
             $scope.newDomain = null;
             $scope.newUserName = null;
             $scope.newPassword = null;
