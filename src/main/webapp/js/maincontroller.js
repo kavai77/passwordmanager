@@ -71,7 +71,14 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.successMessage = "Your password has been successfully stored."
         });
         $('#newPasswordDialog').modal('hide');
+
     };
+    $('#newPasswordDialog').on('shown.bs.modal', function (e) {
+        $scope.newPasswordDialogOpen = true;
+    });
+    $('#newPasswordDialog').on('hidden.bs.modal', function (e) {
+        $scope.newPasswordDialogOpen = false;
+    });
     $scope.masterPasswordLogin = function () {
         if (!$scope.modelMasterPwd) {
             $scope.errorMessage = 'Please provide your Master Password!';

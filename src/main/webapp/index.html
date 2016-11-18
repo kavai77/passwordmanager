@@ -116,7 +116,7 @@
                     </button>
                 </div>
                 <div>
-                    <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain" focus-if="masterKey ? true : false"/>
+                    <input class="form-control" ng-model="tablefilter.domain" placeholder="Filter by domain" focus-if="masterKey"/>
                 </div>
                 <div class="table-responsive visible-xs-inline">
                     <table class="table table-striped">
@@ -273,7 +273,7 @@
             <div class="modal-body">
                 <div class="form-group" ng-class="newDomainClass">
                     <label for="newDomainInput" class="sr-only">New Domain</label>
-                    <input id="newDomainInput" class="form-control" ng-model="newDomain" placeholder="New Domain"/>
+                    <input id="newDomainInput" class="form-control" ng-model="newDomain" placeholder="New Domain" focus-if="newPasswordDialogOpen" >
                 </div>
                 <div class="form-group">
                     <label for="newUserNameInput" class="sr-only">New User Name</label>
