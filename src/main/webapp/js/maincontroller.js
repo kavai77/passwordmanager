@@ -1,4 +1,4 @@
-var app=angular.module('app', ["ngResource", "xeditable", "nonStringSelect", "ui.bootstrap-slider", "focus-if"]);
+var app=angular.module('app', ["ngResource", "xeditable", "nonStringSelect", "ui.bootstrap-slider", "focus-if", "ui.bootstrap"]);
 
 app.run(function(editableOptions) {
     editableOptions.theme = 'bs3';
@@ -34,7 +34,19 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             domain.decodedPassword = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         }
     };
-    $scope.copyPassword = function(domain, event) {
+    $scope.copyUserName = function(domain, index) {
+        clearMessages();
+        new Clipboard('.btn', {
+            text: function(trigger) {
+                return domain.userName;
+            }
+        });
+        $timeout(function () {
+            $("#copyUserName1Button" + index).popover('hide');
+            $("#copyUserName2Button" + index).popover('hide');
+        }, 3000);
+    };
+    $scope.copyPassword = function(domain, index) {
         clearMessages();
         var iv = domain.iv ? forge.util.hexToBytes(domain.iv) : "";
         var decodedPwd = decode(domain.hex, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
@@ -44,7 +56,8 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             }
         });
         $timeout(function () {
-            $("#" + event.target.id).popover('hide');
+            $("#copyPassword1Button" + index).popover('hide');
+            $("#copyPassword2Button" + index).popover('hide');
         }, 3000);
     };
     $scope.addPassword = function () {
@@ -58,6 +71,11 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         if (!$scope.newPassword) {
             $scope.newPasswordClass = 'has-error';
             return;
+        }
+        if (!$scope.newUserName) {
+            $scope.newUserName = "";
+        } else if ($scope.userNames.indexOf($scope.newUserName) == -1) {
+            $scope.userNames.push($scope.newUserName);
         }
         var iv = forge.random.getBytesSync(16);
         var hex = encode($scope.newPassword, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
@@ -89,6 +107,14 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             clearMessages();
             $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
+            var userNames = [];
+            for (i = 0; i < $scope.domains.length; i++) {
+                userName = $scope.domains[i].userName;
+                if (userName && userNames.indexOf(userName) == -1) {
+                    userNames.push(userName);
+                }
+            }
+            $scope.userNames = userNames;
 
             $interval(function() {
                 $scope.timeLockExpires = $scope.lastAction + $scope.user.userSettings.timeoutLengthSeconds * 1000 - new Date().getTime();
@@ -142,13 +168,13 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
 
         $scope.newPassword =  password;
     };
-    $scope.updateDomain = function(domain, data) {
-        if (!data) {
+    $scope.updateDomain = function(domain, domainName) {
+        if (!domainName) {
             return false;
         }
         clearMessages();
         var beforeUpdate = domain.domain;
-        res.PasswordService.changeDomain({id: domain.id, domain: data}, function() {}, function errorCallback() {
+        res.PasswordService.changeDomain({id: domain.id, domain: domainName}, function() {}, function errorCallback() {
             domain.domain = beforeUpdate;
         });
         return true;
@@ -162,13 +188,15 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
     $scope.hoverOrLeaveOverDomain = function(domain) {
         domain.showDomainEditButton = !domain.showDomainEditButton;
     };
-    $scope.updateUserName = function(domain, data) {
-        if (!data) {
-            return false;
+    $scope.updateUserName = function(domain, userName) {
+        if (!userName) {
+            userName = "";
+        } else if ($scope.userNames.indexOf(userName) == -1) {
+             $scope.userNames.push(userName);
         }
         clearMessages();
         var beforeUpdate = domain.userName;
-        res.PasswordService.changeUserName({id: domain.id, userName: data}, function() {}, function errorCallback() {
+        res.PasswordService.changeUserName({id: domain.id, userName: userName}, function() {}, function errorCallback() {
             domain.userName = beforeUpdate;
         });
         return true;
@@ -182,14 +210,14 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
     $scope.hoverOrLeaveOverUserName = function(domain) {
         domain.showUserNameEditButton = !domain.showUserNameEditButton;
     };
-    $scope.updatePassword = function(domain, data) {
-        if (!data) {
+    $scope.updatePassword = function(domain, password) {
+        if (!password) {
             return false;
         }
         clearMessages();
         var beforeUpdate = domain.decodedPassword;
         var iv = forge.random.getBytesSync(16);
-        var hex = encode(data, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
+        var hex = encode(password, $scope.masterKey, iv, $scope.user.cipherAlgorithm);
         var ivHex = forge.util.bytesToHex(iv);
         res.PasswordService.changeHex({id: domain.id, hex: hex, iv: ivHex}, function successCallback() {
             domain.hex = hex;
