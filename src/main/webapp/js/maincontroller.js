@@ -102,6 +102,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             $scope.errorMessage = 'Please provide your Master Password!';
             return;
         }
+        $('#loadingDialog').modal('show');
         var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.user.userId, $scope.modelMasterPwd);
         $scope.domains = res.PasswordService.retrieve({masterPasswordHash: hash}, function successCallback() {
             clearMessages();
@@ -122,8 +123,10 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
                     $window.location.reload();
                 }
             }, 1000);
+            $('#loadingDialog').modal('hide');
         }, function errorCallback(response) {
             $scope.errorMessage = 'Your Master Password is wrong!';
+            $('#loadingDialog').modal('hide');
         });
     };
     $scope.registerUser = function () {
