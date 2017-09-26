@@ -45,7 +45,7 @@ mvn com.google.appengine:appengine-maven-plugin:devserver
 
 ## Architecture
 ### Retrieving and decoding passwords
-![Retrieving and decoding passwords](https://raw.githubusercontent.com/kavai77/passwordmanager/master/src/main/webapp/image/password-retrieval.svg)
+![Retrieving and decoding passwords](https://github.com/kavai77/passwordmanager/blob/master/src/main/webapp/image/password-retrieval.svg)
 
 ### Stroring passwords
 ![Stroring passwords](https://github.com/kavai77/passwordmanager/blob/master/src/main/webapp/image/password-storage.svg)
