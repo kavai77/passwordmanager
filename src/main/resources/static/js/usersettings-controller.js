@@ -1,17 +1,19 @@
 var app=angular.module('app', ['ngResource', 'ui.bootstrap-slider']);
 
-app.controller('ctrl', function ($scope, $resource, $window) {
+app.controller('ctrl', function ($scope, $resource, $window, $http) {
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
     };
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.PublicService.authenticate(function() {
+    let authFunction = function() {
         if (!$scope.user.registered) {
             $window.location = "/";
         }
-    });
+    };
+
+    initFirebase($scope, $http, res, authFunction);
 
     $scope.saveSettings = function () {
         clearMessages();

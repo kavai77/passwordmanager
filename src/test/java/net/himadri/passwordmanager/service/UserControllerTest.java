@@ -18,7 +18,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,10 +61,10 @@ public class UserControllerTest {
                         .param("cipherAlgorithm", "AES-CBC")
                         .param("keyLength", "256")
                         .param("pbkdf2Algorithm", "MD5")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
-        RegisteredUser expectedUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5");
+        RegisteredUser expectedUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5", "salt");
         resultActions
                 .andExpect(status().isCreated());
 
@@ -85,7 +87,7 @@ public class UserControllerTest {
                         .param("cipherAlgorithm", "AES-CBC")
                         .param("keyLength", "256")
                         .param("pbkdf2Algorithm", "MD5")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions

@@ -1,20 +1,29 @@
 package net.himadri.passwordmanager.service;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.googlecode.objectify.Objectify;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
 import static net.himadri.passwordmanager.entity.AdminSettings.ALLOWED_KEYLENGTH;
 import static net.himadri.passwordmanager.entity.AdminSettings.CIPHER_ALGORITHM;
 import static org.apache.commons.lang3.Validate.isTrue;
@@ -25,12 +34,6 @@ import static org.apache.commons.lang3.Validate.notEmpty;
 public class UserController {
     private static final Logger LOG = Logger.getLogger(UserController.class.getName());
 
-    @Autowired
-    Objectify ofy;
-
-    @Autowired
-    UserService userService;
-
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void register(@RequestParam String masterPasswordHash,
@@ -38,30 +41,35 @@ public class UserController {
                          @RequestParam int iterations,
                          @RequestParam String cipherAlgorithm,
                          @RequestParam int keyLength,
-                         @RequestParam String pbkdf2Algorithm) {
+                         @RequestParam String pbkdf2Algorithm,
+                         @RequestHeader(X_AUTHORIZATION_FIREBASE) String firebaseToken
+    ) throws FirebaseAuthException {
         notEmpty(masterPasswordHash);
         notEmpty(masterPasswordHashAlgorithm);
         isTrue(StringUtils.equals(cipherAlgorithm, CIPHER_ALGORITHM));
         isTrue(ArrayUtils.contains(ALLOWED_KEYLENGTH, keyLength));
-        User currentUser = userService.getCurrentUser();
-        isTrue(ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).now() == null);
-        ofy.save().entity(new RegisteredUser(currentUser.getUserId(), masterPasswordHash, masterPasswordHashAlgorithm, currentUser.getEmail(),
-                iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm)).now();
+        FirebaseToken token = FirebaseAuth.getInstance().verifyIdToken(firebaseToken);
+        isTrue(ofy().load().type(RegisteredUser.class).id(token.getUid()).now() == null);
+        ofy().save().entity(new RegisteredUser(token.getUid(), masterPasswordHash, masterPasswordHashAlgorithm, token.getEmail(),
+                iterations, cipherAlgorithm, keyLength, pbkdf2Algorithm, RandomStringUtils.random(10))).now();
     }
 
     @RequestMapping(value = "/userSettings", method = RequestMethod.POST)
-    public void updateUserSettings(@RequestBody UserData.UserSettingsData userSettingsData) {
-        RegisteredUser registeredUser = getRegisteredUser();
+    public void updateUserSettings(
+        @RequestBody UserData.UserSettingsData userSettingsData,
+        @RequestHeader(X_AUTHORIZATION_FIREBASE) String firebaseToken
+    ) throws FirebaseAuthException {
+        RegisteredUser registeredUser = getRegisteredUser(firebaseToken);
         UserSettings userSettings = new UserSettings(registeredUser.getUserId(),
                 userSettingsData.getDefaultPasswordLength(),
                 userSettingsData.getTimeoutLengthSeconds());
-        ofy.save().entity(userSettings);
+        ofy().save().entity(userSettings);
 
     }
 
-    public RegisteredUser getRegisteredUser() {
-        User currentUser = userService.getCurrentUser();
-        return ofy.load().type(RegisteredUser.class).id(currentUser.getUserId()).safe();
+    public RegisteredUser getRegisteredUser(String firebaseToken) throws FirebaseAuthException {
+        String userId = FirebaseAuth.getInstance().verifyIdToken(firebaseToken).getUid();
+        return ofy().load().type(RegisteredUser.class).id(userId).safe();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

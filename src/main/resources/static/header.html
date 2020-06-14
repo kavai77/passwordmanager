@@ -19,7 +19,7 @@
             </ul>
             <ul class="nav navbar-nav navbar-right" ng-show="user.authenticated">
                 <li><p class="navbar-text"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{user.nickName}}</p></li>
-                <li><a href="{{user.logoutURL}}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
+                <li><a href="/" ng-click="logout()"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
                 <li ng-show="timeLockExpires > 0"><p class="navbar-text"><span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{ timeLockExpires | date:'mm:ss'}}</p></li>
             </ul>
         </div><!--/.nav-collapse -->

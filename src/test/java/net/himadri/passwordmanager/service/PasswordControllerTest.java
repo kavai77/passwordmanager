@@ -18,7 +18,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -61,7 +64,7 @@ public class PasswordControllerTest {
                         .param("userName", "userName")
                         .param("hex", "hex")
                         .param("iv", "iv")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         Password expectedPassword = new Password("userId", "domain", "userName", "hex", "iv");
@@ -86,7 +89,7 @@ public class PasswordControllerTest {
                 post("/secure/password/changeDomain")
                         .param("id", "1")
                         .param("domain", "newDomain")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         Password expectedPassword = new Password("userId", "newDomain", "userName", "hex", "iv");
@@ -111,7 +114,7 @@ public class PasswordControllerTest {
                 post("/secure/password/changeDomain")
                         .param("id", "1")
                         .param("domain", "newDomain")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
@@ -134,7 +137,7 @@ public class PasswordControllerTest {
                 post("/secure/password/changeUserName")
                         .param("id", "1")
                         .param("userName", "newUserName")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         Password expectedPassword = new Password("userId", "domain", "newUserName", "hex", "iv");
@@ -159,7 +162,7 @@ public class PasswordControllerTest {
                 post("/secure/password/changeDomain")
                         .param("id", "1")
                         .param("userName", "newUserName")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
@@ -183,7 +186,7 @@ public class PasswordControllerTest {
                         .param("id", "1")
                         .param("hex", "newHex")
                         .param("iv", "newIv")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         Password expectedPassword = new Password("userId", "domain", "userName", "newHex", "newIv");
@@ -209,7 +212,7 @@ public class PasswordControllerTest {
                         .param("id", "1")
                         .param("hex", "newHex")
                         .param("iv", "newIv")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
@@ -231,7 +234,7 @@ public class PasswordControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/deletePassword")
                         .param("id", "1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
@@ -253,7 +256,7 @@ public class PasswordControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/deletePassword")
                         .param("id", "1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
@@ -278,7 +281,7 @@ public class PasswordControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/retrieve")
                         .param("masterPasswordHash", "hash")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
@@ -300,7 +303,7 @@ public class PasswordControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 get("/secure/password/retrieve")
                         .param("masterPasswordHash", "otherHash")
-                        .accept(MediaType.APPLICATION_JSON_UTF8));
+                        .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions

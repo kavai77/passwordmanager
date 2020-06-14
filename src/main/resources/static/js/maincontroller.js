@@ -10,7 +10,7 @@ app.directive('bsPopover', function() {
     };
 });
 
-app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource) {
+app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource, $http) {
     $scope.copySupported = document.queryCommandSupported('copy');
 
     $scope.isActive = function (viewLocation) {
@@ -19,7 +19,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.PublicService.authenticate();
+    initFirebase($scope, $http, res);
 
     $scope.showOrHidePassword = function(domain) {
         clearMessages();
@@ -106,7 +106,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
         var hash = messageDigest($scope.user.masterPasswordHashAlgorithm, $scope.user.userId, $scope.modelMasterPwd);
         $scope.domains = res.PasswordService.retrieve({masterPasswordHash: hash}, function successCallback() {
             clearMessages();
-            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.userId, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
+            $scope.masterKey = deriveKey($scope.modelMasterPwd, $scope.user.salt, $scope.user.iterations, $scope.user.keyLength, $scope.user.pbkdf2Algorithm);
             $scope.modelMasterPwd = null;
             var userNames = [];
             for (i = 0; i < $scope.domains.length; i++) {

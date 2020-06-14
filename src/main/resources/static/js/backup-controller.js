@@ -1,19 +1,21 @@
 var app=angular.module('app', ['ngResource']);
 
-app.controller('ctrl', function ($scope, $resource, $window) {
+app.controller('ctrl', function ($scope, $resource, $window, $http) {
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
     };
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.PublicService.authenticate(function() {
+    let authFunction = function() {
         if (!$scope.user.registered) {
             $window.location = "/";
         } else {
             $scope.backups = res.BackupService.retrieve();
         }
-    });
+    };
+
+    initFirebase($scope, $http, res, authFunction);
 
     $scope.createBackup = function () {
         clearMessages();

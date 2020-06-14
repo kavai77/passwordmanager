@@ -2,6 +2,7 @@ package net.himadri.passwordmanager.entity;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.OnLoad;
 
 @Entity
 public class RegisteredUser {
@@ -15,13 +16,21 @@ public class RegisteredUser {
     private String cipherAlgorithm;
     private int keyLength;
     private String pbkdf2Algorithm;
+    private String salt;
+
+    @OnLoad
+    public void onLoad() {
+        if (salt == null) {
+            salt = userId;
+        }
+    }
 
     public RegisteredUser() {
     }
 
     public RegisteredUser(String userId, String masterPasswordHash, String masterPasswordHashAlgorithm,
                           String email, int iterations, String cipherAlgorithm,
-                          int keyLength, String pbkdf2Algorithm) {
+                          int keyLength, String pbkdf2Algorithm, String salt) {
         this.userId = userId;
         this.masterPasswordHash = masterPasswordHash;
         this.masterPasswordHashAlgorithm = masterPasswordHashAlgorithm;
@@ -30,6 +39,7 @@ public class RegisteredUser {
         this.cipherAlgorithm = cipherAlgorithm;
         this.keyLength = keyLength;
         this.pbkdf2Algorithm = pbkdf2Algorithm;
+        this.salt = salt;
     }
 
     public String getUserId() {
@@ -86,6 +96,10 @@ public class RegisteredUser {
 
     public void setPbkdf2Algorithm(String pbkdf2Algorithm) {
         this.pbkdf2Algorithm = pbkdf2Algorithm;
+    }
+
+    public String getSalt() {
+        return salt;
     }
 
     @Override

@@ -1,20 +1,22 @@
 var app=angular.module('app', ['ngResource', 'nonStringSelect', 'focus-if']);
 
-app.controller('ctrl', function ($scope, $resource, $window) {
+app.controller('ctrl', function ($scope, $resource, $window, $http) {
     $scope.isActive = function (viewLocation) {
         return viewLocation === window.location.pathname;
     };
 
     var res = initResources($scope, $resource);
 
-    $scope.user = res.PublicService.authenticate(function() {
+    let authFuction = function() {
         if (!$scope.user.registered) {
             $window.location = "/";
         }
         if ($scope.user.authenticated) {
             $scope.newKeyLength = $scope.user.keyLength;
         }
-    });
+    };
+
+    initFirebase($scope, $http, res, authFuction);
 
     $scope.changeMasterPassword = function() {
         if (!$scope.newMasterPassword1) {

@@ -1,16 +1,20 @@
 package net.himadri.passwordmanager.service;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
 import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Result;
-import com.googlecode.objectify.cmd.*;
+import com.googlecode.objectify.cmd.Deleter;
+import com.googlecode.objectify.cmd.LoadType;
+import com.googlecode.objectify.cmd.Loader;
+import com.googlecode.objectify.cmd.Query;
+import com.googlecode.objectify.cmd.Saver;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,12 +26,7 @@ public class MockMvcBehaviour {
     @Autowired
     Objectify ofy;
 
-    @Autowired
-    UserService userService;
-
     public void givenUserIsAuthenticated() {
-        User user = new User("email", "authDomain", "userId");
-        when(userService.getCurrentUser()).thenReturn(user);
     }
 
     public void givenObjectifySaverIsMocked() {
@@ -51,7 +50,7 @@ public class MockMvcBehaviour {
     }
 
     public void givenUserIsRegistered() {
-        RegisteredUser registeredUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5");
+        RegisteredUser registeredUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5", "salt");
         when(ofy.load().type(RegisteredUser.class).id("userId").now()).thenReturn(registeredUser);
     }
 
