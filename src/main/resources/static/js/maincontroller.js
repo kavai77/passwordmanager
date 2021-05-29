@@ -252,4 +252,7 @@ app.controller('ctrl', function ($scope, $interval, $window, $timeout, $resource
             return string;
         }
     }
+    $scope.daysElapsed = function (date) {
+        return (new Date().getTime() - date) / 86400000;
+    }
 });

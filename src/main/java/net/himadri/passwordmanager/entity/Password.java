@@ -5,6 +5,8 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
+import java.util.Date;
+
 @Entity
 public class Password {
 
@@ -17,16 +19,20 @@ public class Password {
     private String userName;
     private String hex;
     private String iv;
+    private Date created;
+    private Date modified;
 
     public Password() {
     }
 
-    public Password(String userId, String domain, String userName, String hex, String iv) {
+    public Password(String userId, String domain, String userName, String hex, String iv, Date created, Date modified) {
         this.userId = userId;
         this.domain = domain;
         this.userName = userName;
         this.hex = hex;
         this.iv = iv;
+        this.created = created;
+        this.modified = modified;
     }
 
     public Long getId() {
@@ -67,6 +73,18 @@ public class Password {
 
     public void setIv(String iv) {
         this.iv = iv;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public Date getModified() {
+        return modified;
+    }
+
+    public void setModified(Date modified) {
+        this.modified = modified;
     }
 
     @Override

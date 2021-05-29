@@ -11,12 +11,16 @@
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <bean id="objectify" class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.googlecode.objectify.Objectify"/>
+    <bean id="externalService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="net.himadri.passwordmanager.service.ExternalService"/>
     </bean>
 
-    <bean id="userService" class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.google.appengine.api.users.UserService"/>
+    <bean id="googleCredentials" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.google.auth.oauth2.GoogleCredentials"/>
+    </bean>
+
+    <bean id="dateService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="net.himadri.passwordmanager.service.DateService"/>
     </bean>
 
     <mvc:annotation-driven />

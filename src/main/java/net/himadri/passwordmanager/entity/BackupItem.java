@@ -5,6 +5,8 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
+import java.util.Date;
+
 @Entity
 public class BackupItem {
 
@@ -16,16 +18,20 @@ public class BackupItem {
     private String userName;
     private String hex;
     private String iv;
+    private Date created;
+    private Date modified;
 
     public BackupItem() {
     }
 
-    public BackupItem(Long backupId, String domain, String userName, String hex, String iv) {
+    public BackupItem(Long backupId, String domain, String userName, String hex, String iv, Date created, Date modified) {
         this.backupId = backupId;
         this.domain = domain;
         this.userName = userName;
         this.hex = hex;
         this.iv = iv;
+        this.created = created;
+        this.modified = modified;
     }
 
     public Long getId() {
@@ -40,20 +46,8 @@ public class BackupItem {
         return domain;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
     public String getUserName() {
         return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setHex(String hex) {
-        this.hex = hex;
     }
 
     public String getHex() {
@@ -64,7 +58,11 @@ public class BackupItem {
         return iv;
     }
 
-    public void setIv(String iv) {
-        this.iv = iv;
+    public Date getCreated() {
+        return created;
+    }
+
+    public Date getModified() {
+        return modified;
     }
 }

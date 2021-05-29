@@ -1,20 +1,19 @@
 package net.himadri.passwordmanager.service;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Result;
-import com.googlecode.objectify.cmd.Deleter;
-import com.googlecode.objectify.cmd.LoadType;
-import com.googlecode.objectify.cmd.Loader;
-import com.googlecode.objectify.cmd.Query;
-import com.googlecode.objectify.cmd.Saver;
+import com.googlecode.objectify.cmd.*;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import javax.annotation.PostConstruct;
+import java.util.Date;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,38 +22,55 @@ import static org.mockito.Mockito.when;
  */
 @Component
 public class MockMvcBehaviour {
-    @Autowired
-    Objectify ofy;
+    static final String TEST_AUTH_TOKEN = "auth_token";
 
-    public void givenUserIsAuthenticated() {
+    @Autowired
+    ExternalService externalService;
+
+    @Autowired
+    DateService dateService;
+
+    @PostConstruct
+    public void init() {
+        when(externalService.ofy()).thenReturn(mock(Objectify.class));
+    }
+
+    public void givenUserIsAuthenticated() throws Exception {
+        when(externalService.firebaseAuth()).thenReturn(mock(FirebaseAuth.class));
+        FirebaseToken firebaseToken = mock(FirebaseToken.class);
+        when(externalService.firebaseAuth().verifyIdToken(TEST_AUTH_TOKEN)).thenReturn(firebaseToken);
+        when(firebaseToken.getUid()).thenReturn("userId");
+        when(firebaseToken.getEmail()).thenReturn("email");
+        when(firebaseToken.getName()).thenReturn("name");
     }
 
     public void givenObjectifySaverIsMocked() {
-        when(ofy.save()).thenReturn(mock(Saver.class));
-        when(ofy.save().entity(any())).thenReturn(mock(Result.class));
+        when(externalService.ofy().save()).thenReturn(mock(Saver.class));
+        when(externalService.ofy().save().entity(any())).thenReturn(mock(Result.class));
     }
 
     public void givenObjectifyLoaderIsMocked() {
-        when(ofy.load()).thenReturn(mock(Loader.class));
-        when(ofy.load().type(any(Class.class))).thenReturn(mock(LoadType.class));
-        when(ofy.load().type(Class.class).id(anyLong())).thenReturn(mock(LoadResult.class));
-        when(ofy.load().type(Class.class).id(anyString())).thenReturn(mock(LoadResult.class));
-        when(ofy.load().type(Class.class).filter(anyString(), anyString())).thenReturn(mock(Query.class));
-        when(ofy.load().type(Class.class).filter(anyString(), anyString()).order(anyString())).thenReturn(mock(Query.class));
+        when(externalService.ofy().load()).thenReturn(mock(Loader.class));
+        when(externalService.ofy().load().type(any(Class.class))).thenReturn(mock(LoadType.class));
+        when(externalService.ofy().load().type(Class.class).id(anyLong())).thenReturn(mock(LoadResult.class));
+        when(externalService.ofy().load().type(Class.class).id(anyString())).thenReturn(mock(LoadResult.class));
+        when(externalService.ofy().load().type(Class.class).filter(anyString(), anyString())).thenReturn(mock(Query.class));
+        when(externalService.ofy().load().type(Class.class).filter(anyString(), anyString()).order(anyString())).thenReturn(mock(Query.class));
 
     }
 
     public void givenObjectifyDeleterIsMocked() {
-        when(ofy.delete()).thenReturn(mock(Deleter.class));
-        when(ofy.delete().entity(any())).thenReturn(mock(Result.class));
+        when(externalService.ofy().delete()).thenReturn(mock(Deleter.class));
+        when(externalService.ofy().delete().entity(any())).thenReturn(mock(Result.class));
     }
 
     public void givenUserIsRegistered() {
         RegisteredUser registeredUser = new RegisteredUser("userId", "hash", "hashAlgorithm", "email", 1000, "AES-CBC", 256, "MD5", "salt");
-        when(ofy.load().type(RegisteredUser.class).id("userId").now()).thenReturn(registeredUser);
+        when(externalService.ofy().load().type(RegisteredUser.class).id("userId").now()).thenReturn(registeredUser);
+        when(externalService.ofy().load().type(RegisteredUser.class).id("userId").safe()).thenReturn(registeredUser);
     }
 
-
-
-
+    public void givenCurrentDateIs(Date date) {
+        when(dateService.currentDate()).thenReturn(date);
+    }
 }

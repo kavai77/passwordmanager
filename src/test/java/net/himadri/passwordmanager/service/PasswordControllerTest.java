@@ -1,7 +1,6 @@
 package net.himadri.passwordmanager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.entity.Password;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,11 +16,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
+import java.util.Date;
 
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
+import static net.himadri.passwordmanager.service.MockMvcBehaviour.TEST_AUTH_TOKEN;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -33,11 +32,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration("/test-app-context.xml")
 public class PasswordControllerTest {
+    private static final Date SOME_DATE = new Date(10);
+    private static final Date SOME_OTHER_DATE = new Date(20);
+    private static final Date CURRENT_DATE = new Date(30);
+
     @Autowired
     private WebApplicationContext wac;
 
     @Autowired
-    private Objectify ofy;
+    ExternalService externalService;
 
     @Autowired
     private MockMvcBehaviour mockMvcBehaviour;
@@ -56,10 +59,12 @@ public class PasswordControllerTest {
         // given
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
+        mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/store")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("domain", "domain")
                         .param("userName", "userName")
                         .param("hex", "hex")
@@ -67,12 +72,12 @@ public class PasswordControllerTest {
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "domain", "userName", "hex", "iv");
+        Password expectedPassword = new Password("userId", "domain", "userName", "hex", "iv", CURRENT_DATE, CURRENT_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(ofy.save()).entity(expectedPassword);
+        verify(externalService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -81,23 +86,25 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("userId", "domain", "userName", "hex", "iv"));
+        mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/changeDomain")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .param("domain", "newDomain")
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "newDomain", "userName", "hex", "iv");
+        Password expectedPassword = new Password("userId", "newDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(ofy.save()).entity(expectedPassword);
+        verify(externalService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -106,12 +113,13 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("otherUserId", null, null, null, null));
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/changeDomain")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .param("domain", "newDomain")
                         .accept(MediaType.APPLICATION_JSON));
@@ -120,7 +128,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(ofy.save());
+        verifyNoMoreInteractions(externalService.ofy().save());
     }
 
     @Test
@@ -129,23 +137,25 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("userId", "domain", "userName", "hex", "iv"));
+        mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/changeUserName")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .param("userName", "newUserName")
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "domain", "newUserName", "hex", "iv");
+        Password expectedPassword = new Password("userId", "domain", "newUserName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(ofy.save()).entity(expectedPassword);
+        verify(externalService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -154,12 +164,13 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("otherUserId", null, null, null, null));
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/changeDomain")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .param("userName", "newUserName")
                         .accept(MediaType.APPLICATION_JSON));
@@ -168,7 +179,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(ofy.save());
+        verifyNoMoreInteractions(externalService.ofy().save());
     }
 
     @Test
@@ -177,24 +188,26 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("userId", "domain", "userName", "hex", "iv"));
+        mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/changeHex")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .param("hex", "newHex")
                         .param("iv", "newIv")
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "domain", "userName", "newHex", "newIv");
+        Password expectedPassword = new Password("userId", "domain", "userName", "newHex", "newIv", SOME_DATE, CURRENT_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(ofy.save()).entity(expectedPassword);
+        verify(externalService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -203,12 +216,13 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("otherUserId", null, null, null, null));
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/changeHex")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .param("hex", "newHex")
                         .param("iv", "newIv")
@@ -218,7 +232,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(ofy.save());
+        verifyNoMoreInteractions(externalService.ofy().save());
     }
 
     @Test
@@ -227,12 +241,13 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifyDeleterIsMocked();
-        Password loadedPassword = new Password("userId", "domain", "userName", "hex", "iv");
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(loadedPassword);
+        Password loadedPassword = new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(loadedPassword);
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/deletePassword")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .accept(MediaType.APPLICATION_JSON));
 
@@ -240,7 +255,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().isOk());
 
-        verify(ofy.delete()).entity(loadedPassword);
+        verify(externalService.ofy().delete()).entity(loadedPassword);
     }
 
     @Test
@@ -249,12 +264,13 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifyDeleterIsMocked();
-        when(ofy.load().type(Password.class).id(1L).now()).thenReturn(
-                new Password("otherUserId", null, null, null, null));
+        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+                new Password("otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/deletePassword")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("id", "1")
                         .accept(MediaType.APPLICATION_JSON));
 
@@ -262,7 +278,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(ofy.delete());
+        verifyNoMoreInteractions(externalService.ofy().delete());
     }
 
     @Test
@@ -272,14 +288,15 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenUserIsRegistered();
 
-        Password pwd1 = new Password("userId", "BDomain", "userName", "hex", "iv");
-        Password pwd2 = new Password("userId", "aDomain", "userName", "hex", "iv");
-        when(ofy.load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
+        Password pwd1 = new Password("userId", "BDomain", "userName", "hex", "iv", null, null);
+        Password pwd2 = new Password("userId", "aDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
+        when(externalService.ofy().load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
                 .thenReturn(Arrays.asList(pwd1, pwd2));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/password/retrieve")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("masterPasswordHash", "hash")
                         .accept(MediaType.APPLICATION_JSON));
 
@@ -288,8 +305,8 @@ public class PasswordControllerTest {
                 .andExpect(status().isOk()).andDo(print())
                 .andExpect(content().json(objectMapper.writeValueAsString(Arrays.asList(pwd2, pwd1))));
 
-        verify(ofy.load().type(Password.class)).filter("userId", "userId");
-        verify(ofy.load().type(Password.class).filter("userId", "userId")).order("domain");
+        verify(externalService.ofy().load().type(Password.class)).filter("userId", "userId");
+        verify(externalService.ofy().load().type(Password.class).filter("userId", "userId")).order("domain");
     }
 
     @Test
@@ -302,6 +319,7 @@ public class PasswordControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 get("/secure/password/retrieve")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("masterPasswordHash", "otherHash")
                         .accept(MediaType.APPLICATION_JSON));
 

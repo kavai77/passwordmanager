@@ -29,18 +29,24 @@ We use the following libraries from GCP:
 ```
 mvn test
 ```
-### Creating the deployable artifact (WAR)
+## Docker
+Build image:
 ```
 mvn package
 ```
-### Deploying to Google Cloud Platform
+Run on `localhost:8081`:
 ```
-mvn com.google.appengine:appengine-maven-plugin:update
+docker run -p 8081:8080 kavai77/passwordmanager:1.0
 ```
-*Note: for this step, you do not need to run the previous steps, testing and creating the WAR are performed as automatically.*
-### Running local server
+Save image:
 ```
-mvn com.google.appengine:appengine-maven-plugin:devserver
+docker save -o dockerimage kavai77/passwordmanager:1.0
+```
+
+### Upload image
+```
+docker login docker.himadri.eu:5000
+docker push docker.himadri.eu:5000/kavai77/passwordmanager:1.0
 ```
 
 ## Architecture

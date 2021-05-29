@@ -1,7 +1,6 @@
 package net.himadri.passwordmanager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.objectify.Objectify;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
@@ -18,9 +17,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
+import static net.himadri.passwordmanager.service.MockMvcBehaviour.TEST_AUTH_TOKEN;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,7 +32,7 @@ public class UserControllerTest {
     private WebApplicationContext wac;
 
     @Autowired
-    private Objectify ofy;
+    ExternalService externalService;
 
     @Autowired
     private MockMvcBehaviour mockMvcBehaviour;
@@ -49,12 +48,14 @@ public class UserControllerTest {
     public void given_GoodParameters_when_Registering_Then_Success() throws Exception {
         // given
         mockMvcBehaviour.givenUserIsAuthenticated();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         givenUserIsNotRegistered();
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/user/register")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("masterPasswordHash", "hash")
                         .param("masterPasswordHashAlgorithm", "hashAlgorithm")
                         .param("iterations", "1000")
@@ -68,7 +69,7 @@ public class UserControllerTest {
         resultActions
                 .andExpect(status().isCreated());
 
-        verify(ofy.save()).entity(expectedUser);
+        verify(externalService.ofy().save()).entity(expectedUser);
     }
 
     @Test
@@ -76,11 +77,13 @@ public class UserControllerTest {
         // given
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
+        mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenUserIsRegistered();
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/user/register")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .param("masterPasswordHash", "hash")
                         .param("masterPasswordHashAlgorithm", "hashAlgorithm")
                         .param("iterations", "1000")
@@ -93,7 +96,7 @@ public class UserControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(ofy.save());
+        verifyNoMoreInteractions(externalService.ofy().save());
     }
 
     @Test
@@ -108,6 +111,7 @@ public class UserControllerTest {
         UserData.UserSettingsData userSettingsData = new UserData.UserSettingsData(1, 2);
         ResultActions resultActions = mockMvc.perform(
                 post("/secure/user/userSettings")
+                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
                         .content(new ObjectMapper().writeValueAsString(userSettingsData))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON));
@@ -116,11 +120,11 @@ public class UserControllerTest {
         resultActions
                 .andExpect(status().isOk());
 
-        verify(ofy.save()).entity(new UserSettings("userId", 1, 2));
+        verify(externalService.ofy().save()).entity(new UserSettings("userId", 1, 2));
     }
 
     private void givenUserIsNotRegistered() {
-        when(ofy.load().type(RegisteredUser.class).id("userId").now()).thenReturn(null);
+        when(externalService.ofy().load().type(RegisteredUser.class).id("userId").now()).thenReturn(null);
     }
 
 }
