@@ -1,5 +1,6 @@
 package net.himadri.passwordmanager;
 
+import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -11,13 +12,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.event.EventListener;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 
 @SpringBootApplication
 @ComponentScan(basePackageClasses = PasswordController.class)
 public class App {
-    public static final String GAE_SERVICE_ACCOUNT = "/passwordmanager-1166-e42fb1659779.json";
+    public static final String GAE_SERVICE_ACCOUNT = "../secrets/passwordmanager-1166-e42fb1659779.json";
     public static final String X_AUTHORIZATION_FIREBASE = "X-Authorization-Firebase";
 
     public static void main(String[] args) {
@@ -32,7 +34,7 @@ public class App {
 
     @Bean
     public GoogleCredentials googleCredentials() throws IOException {
-        return GoogleCredentials.fromStream(getClass().getResourceAsStream(GAE_SERVICE_ACCOUNT));
+        return GoogleCredentials.fromStream(new FileInputStream(GAE_SERVICE_ACCOUNT));
     }
 
     @EventListener(ApplicationReadyEvent.class)
