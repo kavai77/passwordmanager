@@ -1,3 +1,0 @@
-[submodule "passwordmanager-secrets"]
-	path = passwordmanager-secrets
-	url = https://github.com/kavai77/passwordmanager-secrets.git
