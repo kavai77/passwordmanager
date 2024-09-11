@@ -19,7 +19,7 @@ import java.util.Collections;
 @SpringBootApplication
 @ComponentScan(basePackageClasses = PasswordController.class)
 public class App {
-    public static final String GAE_SERVICE_ACCOUNT = "../secrets/passwordmanager-1166-e42fb1659779.json";
+    public static final String GAE_SERVICE_ACCOUNT = "/usr/share/secrets/passwordmanager-1166-e42fb1659779.json";
     public static final String X_AUTHORIZATION_FIREBASE = "X-Authorization-Firebase";
 
     public static void main(String[] args) {
