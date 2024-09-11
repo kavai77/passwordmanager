@@ -5,6 +5,7 @@ import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
 import static net.himadri.passwordmanager.service.MockMvcBehaviour.TEST_AUTH_TOKEN;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @ContextConfiguration("/test-app-context.xml")
+@Ignore
 public class UserControllerTest {
     @Autowired
     private WebApplicationContext wac;

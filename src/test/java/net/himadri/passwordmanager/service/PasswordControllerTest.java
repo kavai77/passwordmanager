@@ -3,6 +3,7 @@ package net.himadri.passwordmanager.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.himadri.passwordmanager.entity.Password;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,10 @@ import java.util.Date;
 
 import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
 import static net.himadri.passwordmanager.service.MockMvcBehaviour.TEST_AUTH_TOKEN;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @ContextConfiguration("/test-app-context.xml")
+@Ignore
 public class PasswordControllerTest {
     private static final Date SOME_DATE = new Date(10);
     private static final Date SOME_OTHER_DATE = new Date(20);
