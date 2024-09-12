@@ -50,8 +50,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            JAR_FILE=target/passwordmanager-*.jar
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
