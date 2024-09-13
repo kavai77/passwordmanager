@@ -3,10 +3,18 @@ package net.himadri.passwordmanager.entity;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Backup {
 
     @Id
@@ -20,83 +28,4 @@ public class Backup {
     private String pbkdf2Algorithm;
     private String masterPasswordHashAlgorithm;
     private Date backupDate;
-
-    public Backup() {
-    }
-
-    public Backup(String userId, String masterPasswordHash, int iterations, String cipherAlgorithm, int keyLength,
-                  String pbkdf2Algorithm, String masterPasswordHashAlgorithm, Date backupDate) {
-        this.userId = userId;
-        this.masterPasswordHash = masterPasswordHash;
-        this.iterations = iterations;
-        this.cipherAlgorithm = cipherAlgorithm;
-        this.keyLength = keyLength;
-        this.pbkdf2Algorithm = pbkdf2Algorithm;
-        this.masterPasswordHashAlgorithm = masterPasswordHashAlgorithm;
-        this.backupDate = backupDate;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getMasterPasswordHash() {
-        return masterPasswordHash;
-    }
-
-    public void setMasterPasswordHash(String masterPasswordHash) {
-        this.masterPasswordHash = masterPasswordHash;
-    }
-
-    public int getIterations() {
-        return iterations;
-    }
-
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
-    }
-
-    public String getCipherAlgorithm() {
-        return cipherAlgorithm;
-    }
-
-    public void setCipherAlgorithm(String cipherAlgorithm) {
-        this.cipherAlgorithm = cipherAlgorithm;
-    }
-
-    public int getKeyLength() {
-        return keyLength;
-    }
-
-    public void setKeyLength(int keyLength) {
-        this.keyLength = keyLength;
-    }
-
-    public String getPbkdf2Algorithm() {
-        return pbkdf2Algorithm;
-    }
-
-    public void setPbkdf2Algorithm(String pbkdf2Algorithm) {
-        this.pbkdf2Algorithm = pbkdf2Algorithm;
-    }
-
-    public String getMasterPasswordHashAlgorithm() {
-        return masterPasswordHashAlgorithm;
-    }
-
-    public void setMasterPasswordHashAlgorithm(String masterPasswordHashAlgorithm) {
-        this.masterPasswordHashAlgorithm = masterPasswordHashAlgorithm;
-    }
-
-    public Date getBackupDate() {
-        return backupDate;
-    }
-
-    public void setBackupDate(Date backupDate) {
-        this.backupDate = backupDate;
-    }
 }

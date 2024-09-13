@@ -77,7 +77,7 @@ public class PasswordControllerTest {
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "domain", "userName", "hex", "iv", CURRENT_DATE, CURRENT_DATE);
+        Password expectedPassword = new Password(null, "userId", "domain", "userName", "hex", "iv", CURRENT_DATE, CURRENT_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
@@ -93,7 +93,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
+                new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -104,7 +104,7 @@ public class PasswordControllerTest {
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "newDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
+        Password expectedPassword = new Password(null, "userId", "newDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
@@ -119,7 +119,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("otherUserId", null, null, null, null, null, null));
+                new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -144,7 +144,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
+                new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -155,7 +155,7 @@ public class PasswordControllerTest {
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "domain", "newUserName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
+        Password expectedPassword = new Password(null, "userId", "domain", "newUserName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
@@ -170,7 +170,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("otherUserId", null, null, null, null, null, null));
+                new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -195,7 +195,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
+                new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -207,7 +207,7 @@ public class PasswordControllerTest {
                         .accept(MediaType.APPLICATION_JSON));
 
         // then
-        Password expectedPassword = new Password("userId", "domain", "userName", "newHex", "newIv", SOME_DATE, CURRENT_DATE);
+        Password expectedPassword = new Password(null, "userId", "domain", "userName", "newHex", "newIv", SOME_DATE, CURRENT_DATE);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
@@ -222,7 +222,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("otherUserId", null, null, null, null, null, null));
+                new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -246,7 +246,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifyDeleterIsMocked();
-        Password loadedPassword = new Password("userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
+        Password loadedPassword = new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(loadedPassword);
 
         // when
@@ -270,7 +270,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifyDeleterIsMocked();
         when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
-                new Password("otherUserId", null, null, null, null, null, null));
+                new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -293,8 +293,8 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenUserIsRegistered();
 
-        Password pwd1 = new Password("userId", "BDomain", "userName", "hex", "iv", null, null);
-        Password pwd2 = new Password("userId", "aDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
+        Password pwd1 = new Password(null, "userId", "BDomain", "userName", "hex", "iv", null, null);
+        Password pwd2 = new Password(null, "userId", "aDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
         when(externalService.ofy().load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
                 .thenReturn(Arrays.asList(pwd1, pwd2));
 

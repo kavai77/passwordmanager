@@ -2,6 +2,7 @@ package net.himadri.passwordmanager.service;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import lombok.RequiredArgsConstructor;
 import net.himadri.passwordmanager.dto.RecommendedSettings;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.AccessLog;
@@ -9,7 +10,6 @@ import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +23,10 @@ import static net.himadri.passwordmanager.entity.AdminSettings.DEFAULT_ITERATION
 
 @RestController
 @RequestMapping(value = "/public")
+@RequiredArgsConstructor
 public class PublicController {
 
-    @Autowired
-    ExternalService externalService;
+    private final ExternalService externalService;
 
     @RequestMapping(value = "/secureRandom", produces = MediaType.TEXT_PLAIN_VALUE)
     public String createSecureRandom() {
@@ -52,7 +52,11 @@ public class PublicController {
 
     @RequestMapping("/recommendedSettings")
     public RecommendedSettings getRecommendedSettings() {
-        return new RecommendedSettings(DEFAULT_ITERATIONS, AdminSettings.DEFAULT_PBKDF2_ALGORITHM, AdminSettings.DEFAULT_HASH_ALGORITHM);
+        return RecommendedSettings.builder()
+                .recommendedIterations(DEFAULT_ITERATIONS)
+                .recommendedPbkdf2Algorithm(AdminSettings.DEFAULT_PBKDF2_ALGORITHM)
+                .recommendedMasterPasswordHashAlgorithm(AdminSettings.DEFAULT_HASH_ALGORITHM)
+                .build();
     }
 
 
@@ -62,8 +66,10 @@ public class PublicController {
             userSettings = new UserSettings(userId, AdminSettings.DEFAULT_USER_PASSWORD_LENGTH, AdminSettings.DEFAULT_USER_TIMEOUT_LENGTH_SECONDS);
             externalService.ofy().save().entity(userSettings);
         }
-        return new UserData.UserSettingsData(userSettings.getDefaultPasswordLength(),
-                userSettings.getTimeoutLengthSeconds());
+        return UserData.UserSettingsData.builder()
+                .defaultPasswordLength(userSettings.getDefaultPasswordLength())
+                .timeoutLengthSeconds(userSettings.getTimeoutLengthSeconds())
+                .build();
 
     }
 }

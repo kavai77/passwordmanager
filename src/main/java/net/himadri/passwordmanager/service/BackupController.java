@@ -1,17 +1,27 @@
 package net.himadri.passwordmanager.service;
 
 import com.google.firebase.auth.FirebaseAuthException;
+import lombok.RequiredArgsConstructor;
 import net.himadri.passwordmanager.dto.BackupData;
 import net.himadri.passwordmanager.entity.Backup;
 import net.himadri.passwordmanager.entity.BackupItem;
 import net.himadri.passwordmanager.entity.Password;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,33 +30,47 @@ import static org.apache.commons.lang3.Validate.isTrue;
 
 @RestController
 @RequestMapping(value = "/secure/backup")
+@RequiredArgsConstructor
 public class BackupController {
     private static final Logger LOG = Logger.getLogger(BackupController.class.getName());
 
-    @Autowired
-    UserController userController;
-
-    @Autowired
-    PasswordController passwordController;
-
-    @Autowired
-    ExternalService externalService;
+    private final UserController userController;
+    private final PasswordController passwordController;
+    private final ExternalService externalService;
     
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public BackupData createBackup(@RequestHeader(X_AUTHORIZATION_FIREBASE) String firebaseToken) throws FirebaseAuthException {
         RegisteredUser user = userController.getRegisteredUser(firebaseToken);
-        Backup backup = new Backup(user.getUserId(), user.getMasterPasswordHash(),
-                user.getIterations(), user.getCipherAlgorithm(), user.getKeyLength(),
-                user.getPbkdf2Algorithm(), user.getMasterPasswordHashAlgorithm(), new Date());
+        var backup = Backup.builder()
+                .userId(user.getUserId())
+                .masterPasswordHash(user.getMasterPasswordHash())
+                .iterations(user.getIterations())
+                .cipherAlgorithm(user.getCipherAlgorithm())
+                .keyLength(user.getKeyLength())
+                .pbkdf2Algorithm(user.getPbkdf2Algorithm())
+                .masterPasswordHashAlgorithm(user.getMasterPasswordHashAlgorithm())
+                .backupDate(new Date())
+                .build();
         externalService.ofy().save().entity(backup).now();
 
         List<Password> allPasswords = externalService.ofy().load().type(Password.class).filter("userId", user.getUserId()).list();
         for (Password password: allPasswords) {
-            externalService.ofy().save().entity(new BackupItem(backup.getId(), password.getDomain(), password.getUserName(),
-                    password.getHex(), password.getIv(), password.getCreated(), password.getModified()));
+            externalService.ofy().save().entity(BackupItem.builder()
+                    .backupId(backup.getId())
+                    .domain(password.getDomain())
+                    .userName(password.getUserName())
+                    .hex(password.getHex())
+                    .iv(password.getIv())
+                    .created(password.getCreated())
+                    .modified(password.getModified())
+                    .build());
         }
-        return new BackupData(backup.getId(), backup.getBackupDate().getTime(), allPasswords.size(),
-                backup.getMasterPasswordHashAlgorithm());
+        return BackupData.builder()
+                .id(backup.getId())
+                .backupDate(backup.getBackupDate().getTime())
+                .numberOfPasswords(allPasswords.size())
+                .masterPasswordHashAlgorithm(backup.getMasterPasswordHashAlgorithm())
+                .build();
     }
 
 
@@ -73,14 +97,14 @@ public class BackupController {
         String userId = externalService.firebaseAuth().verifyIdToken(firebaseToken).getUid();
         for (Backup backup: externalService.ofy().load().type(Backup.class).filter("userId", userId)) {
             int numberOfItems = externalService.ofy().load().type(BackupItem.class).filter("backupId", backup.getId()).count();
-            result.add(new BackupData(backup.getId(), backup.getBackupDate().getTime(), numberOfItems, backup.getMasterPasswordHashAlgorithm()));
+            result.add(BackupData.builder()
+                    .id(backup.getId())
+                    .backupDate(backup.getBackupDate().getTime())
+                    .numberOfPasswords(numberOfItems)
+                    .masterPasswordHashAlgorithm(backup.getMasterPasswordHashAlgorithm())
+                    .build());
         }
-        Collections.sort(result, new Comparator<BackupData>() {
-            @Override
-            public int compare(BackupData o1, BackupData o2) {
-                return o1.getBackupDate().compareTo(o2.getBackupDate());
-            }
-        });
+        result.sort(Comparator.comparing(BackupData::getBackupDate));
         Collections.reverse(result);
         return result;
     }
@@ -106,8 +130,15 @@ public class BackupController {
     private void saveBackupPasswords(Long backupId, RegisteredUser user) {
         List<BackupItem> backupItems = getAllBackupItems(backupId);
         for (BackupItem backupItem: backupItems) {
-            externalService.ofy().save().entity(new Password(user.getUserId(), backupItem.getDomain(), backupItem.getUserName(),
-                    backupItem.getHex(), backupItem.getIv(), backupItem.getCreated(), backupItem.getModified()));
+            externalService.ofy().save().entity(Password.builder()
+                    .userId(user.getUserId())
+                    .domain(backupItem.getDomain())
+                    .userName(backupItem.getUserName())
+                    .hex(backupItem.getHex())
+                    .iv(backupItem.getIv())
+                    .created(backupItem.getCreated())
+                    .modified(backupItem.getModified())
+                    .build());
         }
     }
 

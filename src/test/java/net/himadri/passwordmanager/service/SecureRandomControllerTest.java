@@ -12,7 +12,7 @@ public class SecureRandomControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        underTest = new PublicController();
+        underTest = new PublicController(null);
     }
 
     @Test

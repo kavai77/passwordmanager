@@ -3,17 +3,27 @@ package net.himadri.passwordmanager.service;
 import com.google.cloud.datastore.QueryResults;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import lombok.RequiredArgsConstructor;
 import net.himadri.passwordmanager.entity.AdminSettings;
 import net.himadri.passwordmanager.entity.Password;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.service.exception.NotAuthorizedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,17 +36,13 @@ import static org.apache.commons.lang3.Validate.notEmpty;
 
 @RestController
 @RequestMapping(value = "/secure/password")
+@RequiredArgsConstructor
 public class PasswordController {
     private static final Logger LOG = Logger.getLogger(PasswordController.class.getName());
 
-    @Autowired
-    UserController userController;
-
-    @Autowired
-    DateService dateService;
-    
-    @Autowired
-    ExternalService externalService;
+    private final UserController userController;
+    private final DateService dateService;
+    private final ExternalService externalService;
 
     @RequestMapping(value = "/store", method = RequestMethod.POST)
     public Password store(@RequestParam String domain,
@@ -49,8 +55,15 @@ public class PasswordController {
         checkArgument(isNotBlank(hex));
         checkArgument(isNotBlank(iv));
         String userId = externalService.firebaseAuth().verifyIdToken(firebaseToken).getUid();
-        Password password = new Password(userId, domain, userName, hex, iv,
-                dateService.currentDate(), dateService.currentDate());
+        Password password = Password.builder()
+                .userId(userId)
+                .domain(domain)
+                .userName(userName)
+                .hex(hex)
+                .iv(iv)
+                .created(dateService.currentDate())
+                .modified(dateService.currentDate())
+                .build();
         externalService.ofy().save().entity(password).now();
         return password;
     }
@@ -164,12 +177,7 @@ public class PasswordController {
             throw new NotAuthorizedException();
         }
         List<Password> passwords = externalService.ofy().load().type(Password.class).filter("userId", registeredUser.getUserId()).order("domain").list();
-        Collections.sort(passwords, new Comparator<Password>() {
-            @Override
-            public int compare(Password o1, Password o2) {
-                return o1.getDomain().toLowerCase().compareTo(o2.getDomain().toLowerCase());
-            }
-        });
+        passwords.sort(Comparator.comparing(o -> o.getDomain().toLowerCase()));
         return passwords;
     }
 

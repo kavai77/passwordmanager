@@ -112,13 +112,16 @@ public class UserControllerTest {
         mockMvcBehaviour.givenUserIsRegistered();
 
         // when
-        UserData.UserSettingsData userSettingsData = new UserData.UserSettingsData(1, 2);
+        UserData.UserSettingsData userSettingsData = UserData.UserSettingsData.builder()
+                .defaultPasswordLength(1)
+                .timeoutLengthSeconds(2)
+                .build();
         ResultActions resultActions = mockMvc.perform(
-                post("/secure/user/userSettings")
-                        .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
-                        .content(new ObjectMapper().writeValueAsString(userSettingsData))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON));
+        post("/secure/user/userSettings")
+                .header(X_AUTHORIZATION_FIREBASE, TEST_AUTH_TOKEN)
+                .content(new ObjectMapper().writeValueAsString(userSettingsData))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
         // then
         resultActions
