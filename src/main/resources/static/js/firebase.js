@@ -15,7 +15,7 @@ function initFirebase($scope, $http, res, authFunction) {
             user.getIdToken()
                 .then(function(result) {
                     $http.defaults.headers.common['X-Authorization-Firebase'] = result;
-                    $scope.user = res.PublicService.authenticate(authFunction);
+                    $scope.user = res.UserService.authenticate(authFunction);
                 });
         } else {
             $http.defaults.headers.common['X-Authorization-Firebase'] = null;

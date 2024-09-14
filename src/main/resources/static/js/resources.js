@@ -15,12 +15,12 @@ function initResources($scope, $resource) {
 
     resource.PublicService = $resource('/public/:action', {}, {
         recommendedSettings: {params: {action: 'recommendedSettings'}, interceptor: {responseError : defaultServerError}},
-        authenticate: {params: {action: 'authenticate'}, interceptor: {responseError : defaultServerError}},
         secureRandom: {params: {action: 'secureRandom'}, transformResponse: function(data) {return {value: data};}, interceptor: {responseError : defaultServerError}}
     });
 
 
     resource.UserService = $resource('/secure/user/:action', {}, {
+        authenticate: {params: {action: 'authenticate'}, interceptor: {responseError : defaultServerError}},
         register: {method: 'POST', params: {action: 'register'}, headers: urlEncodedHeaders, transformRequest: urlEncodedTransform, interceptor: {responseError : defaultServerError}},
         updateUserSettings: {method: 'POST', params: {action: 'userSettings'}, interceptor: {responseError : defaultServerError}}
     });

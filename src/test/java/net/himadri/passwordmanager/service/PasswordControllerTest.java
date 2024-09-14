@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@ContextConfiguration("/test-app-context.xml")
 @Ignore
 public class PasswordControllerTest {
     private static final Date SOME_DATE = new Date(10);
@@ -45,7 +43,7 @@ public class PasswordControllerTest {
     private WebApplicationContext wac;
 
     @Autowired
-    ExternalService externalService;
+    DatabaseService databaseService;
 
     @Autowired
     private MockMvcBehaviour mockMvcBehaviour;
@@ -82,7 +80,7 @@ public class PasswordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(externalService.ofy().save()).entity(expectedPassword);
+        verify(databaseService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -92,7 +90,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
@@ -109,7 +107,7 @@ public class PasswordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(externalService.ofy().save()).entity(expectedPassword);
+        verify(databaseService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -118,7 +116,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
@@ -133,7 +131,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(externalService.ofy().save());
+        verifyNoMoreInteractions(databaseService.ofy().save());
     }
 
     @Test
@@ -143,7 +141,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
@@ -160,7 +158,7 @@ public class PasswordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(externalService.ofy().save()).entity(expectedPassword);
+        verify(databaseService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -169,7 +167,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
@@ -184,7 +182,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(externalService.ofy().save());
+        verifyNoMoreInteractions(databaseService.ofy().save());
     }
 
     @Test
@@ -194,7 +192,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         mockMvcBehaviour.givenCurrentDateIs(CURRENT_DATE);
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE));
 
         // when
@@ -212,7 +210,7 @@ public class PasswordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedPassword)));
 
-        verify(externalService.ofy().save()).entity(expectedPassword);
+        verify(databaseService.ofy().save()).entity(expectedPassword);
     }
 
     @Test
@@ -221,7 +219,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
@@ -237,7 +235,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(externalService.ofy().save());
+        verifyNoMoreInteractions(databaseService.ofy().save());
     }
 
     @Test
@@ -247,7 +245,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifyDeleterIsMocked();
         Password loadedPassword = new Password(null, "userId", "domain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(loadedPassword);
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(loadedPassword);
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -260,7 +258,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().isOk());
 
-        verify(externalService.ofy().delete()).entity(loadedPassword);
+        verify(databaseService.ofy().delete()).entity(loadedPassword);
     }
 
     @Test
@@ -269,7 +267,7 @@ public class PasswordControllerTest {
         mockMvcBehaviour.givenUserIsAuthenticated();
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifyDeleterIsMocked();
-        when(externalService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
+        when(databaseService.ofy().load().type(Password.class).id(1L).safe()).thenReturn(
                 new Password(null, "otherUserId", null, null, null, null, null, null));
 
         // when
@@ -283,7 +281,7 @@ public class PasswordControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(externalService.ofy().delete());
+        verifyNoMoreInteractions(databaseService.ofy().delete());
     }
 
     @Test
@@ -295,7 +293,7 @@ public class PasswordControllerTest {
 
         Password pwd1 = new Password(null, "userId", "BDomain", "userName", "hex", "iv", null, null);
         Password pwd2 = new Password(null, "userId", "aDomain", "userName", "hex", "iv", SOME_DATE, SOME_OTHER_DATE);
-        when(externalService.ofy().load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
+        when(databaseService.ofy().load().type(Password.class).filter(anyString(), anyString()).order(anyString()).list())
                 .thenReturn(Arrays.asList(pwd1, pwd2));
 
         // when
@@ -310,8 +308,8 @@ public class PasswordControllerTest {
                 .andExpect(status().isOk()).andDo(print())
                 .andExpect(content().json(objectMapper.writeValueAsString(Arrays.asList(pwd2, pwd1))));
 
-        verify(externalService.ofy().load().type(Password.class)).filter("userId", "userId");
-        verify(externalService.ofy().load().type(Password.class).filter("userId", "userId")).order("domain");
+        verify(databaseService.ofy().load().type(Password.class)).filter("userId", "userId");
+        verify(databaseService.ofy().load().type(Password.class).filter("userId", "userId")).order("domain");
     }
 
     @Test

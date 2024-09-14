@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,14 +28,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@ContextConfiguration("/test-app-context.xml")
 @Ignore
 public class UserControllerTest {
     @Autowired
     private WebApplicationContext wac;
 
     @Autowired
-    ExternalService externalService;
+    DatabaseService databaseService;
 
     @Autowired
     private MockMvcBehaviour mockMvcBehaviour;
@@ -73,7 +71,7 @@ public class UserControllerTest {
         resultActions
                 .andExpect(status().isCreated());
 
-        verify(externalService.ofy().save()).entity(expectedUser);
+        verify(databaseService.ofy().save()).entity(expectedUser);
     }
 
     @Test
@@ -100,7 +98,7 @@ public class UserControllerTest {
         resultActions
                 .andExpect(status().is4xxClientError());
 
-        verifyNoMoreInteractions(externalService.ofy().save());
+        verifyNoMoreInteractions(databaseService.ofy().save());
     }
 
     @Test
@@ -127,11 +125,11 @@ public class UserControllerTest {
         resultActions
                 .andExpect(status().isOk());
 
-        verify(externalService.ofy().save()).entity(new UserSettings("userId", 1, 2));
+        verify(databaseService.ofy().save()).entity(new UserSettings("userId", 1, 2));
     }
 
     private void givenUserIsNotRegistered() {
-        when(externalService.ofy().load().type(RegisteredUser.class).id("userId").now()).thenReturn(null);
+        when(databaseService.ofy().load().type(RegisteredUser.class).id("userId").now()).thenReturn(null);
     }
 
 }
