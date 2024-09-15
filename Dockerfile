@@ -1,3 +1,3 @@
 FROM eclipse-temurin:21
-ADD target/passwordmanager-*.jar /usr/share/app.jar
-ENTRYPOINT ["java", "-jar", "/usr/share/app.jar"]
+ADD target/passwordmanager-*.jar /usr/local/app.jar
+ENTRYPOINT ["java", "-jar", "/usr/local/app.jar"]
