@@ -1,16 +1,16 @@
 package net.himadri.passwordmanager.service;
 
 import net.himadri.passwordmanager.entity.AdminSettings;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SecureRandomControllerTest {
 
     private PublicController underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         underTest = new PublicController(null);
     }

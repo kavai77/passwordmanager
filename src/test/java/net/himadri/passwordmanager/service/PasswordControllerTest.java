@@ -1,22 +1,25 @@
 package net.himadri.passwordmanager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.himadri.passwordmanager.entity.Password;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import net.himadri.passwordmanager.security.AuthenticationService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
 import static net.himadri.passwordmanager.service.MockMvcBehaviour.TEST_AUTH_TOKEN;
@@ -30,31 +33,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@RunWith(SpringRunner.class)
-@WebAppConfiguration
-@Ignore
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class PasswordControllerTest {
     private static final Date SOME_DATE = new Date(10);
     private static final Date SOME_OTHER_DATE = new Date(20);
     private static final Date CURRENT_DATE = new Date(30);
 
-    @Autowired
-    private WebApplicationContext wac;
+    @MockBean
+    private AuthenticationService authenticationService;
 
-    @Autowired
-    DatabaseService databaseService;
+    @MockBean
+    private DatabaseService databaseService;
 
-    @Autowired
+    @MockBean
+    private DateService dateService;
+
     private MockMvcBehaviour mockMvcBehaviour;
 
+    @Autowired
     private MockMvc mockMvc;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Before
+    @BeforeEach
     public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        mockMvcBehaviour = new MockMvcBehaviour(authenticationService, databaseService, dateService);
+        objectMapper.registerModule(new JavaTimeModule());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS+00:00");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        objectMapper.setDateFormat(dateFormat);
     }
 
     @Test

@@ -4,21 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.himadri.passwordmanager.dto.UserData;
 import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import net.himadri.passwordmanager.security.AuthenticationService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import static net.himadri.passwordmanager.App.X_AUTHORIZATION_FIREBASE;
 import static net.himadri.passwordmanager.service.MockMvcBehaviour.TEST_AUTH_TOKEN;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -26,26 +27,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@RunWith(SpringRunner.class)
-@WebAppConfiguration
-@Ignore
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class UserControllerTest {
-    @Autowired
-    private WebApplicationContext wac;
+    @MockBean
+    private AuthenticationService authenticationService;
 
-    @Autowired
-    DatabaseService databaseService;
+    @MockBean
+    private DatabaseService databaseService;
 
-    @Autowired
+    @MockBean
+    private DateService dateService;
+
     private MockMvcBehaviour mockMvcBehaviour;
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        mockMvcBehaviour = new MockMvcBehaviour(authenticationService, databaseService, dateService);
     }
-
     @Test
     public void given_GoodParameters_when_Registering_Then_Success() throws Exception {
         // given
@@ -53,6 +56,7 @@ public class UserControllerTest {
         mockMvcBehaviour.givenObjectifyLoaderIsMocked();
         mockMvcBehaviour.givenObjectifySaverIsMocked();
         givenUserIsNotRegistered();
+        when(databaseService.randomString(anyInt())).thenReturn("salt");
 
         // when
         ResultActions resultActions = mockMvc.perform(

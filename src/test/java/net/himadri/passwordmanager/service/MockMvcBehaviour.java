@@ -10,10 +10,8 @@ import com.googlecode.objectify.cmd.Loader;
 import com.googlecode.objectify.cmd.Query;
 import com.googlecode.objectify.cmd.Saver;
 import net.himadri.passwordmanager.entity.RegisteredUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import net.himadri.passwordmanager.security.AuthenticationService;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,21 +20,19 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * Created by himadri on 2016. 11. 06..
- */
-@Component
 public class MockMvcBehaviour {
     static final String TEST_AUTH_TOKEN = "auth_token";
 
-    @Autowired
-    DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
-    @Autowired
-    DateService dateService;
+    private final DateService dateService;
 
-    @PostConstruct
-    public void init() {
+    private final AuthenticationService authenticationService;
+
+    public MockMvcBehaviour(AuthenticationService authenticationService, DatabaseService databaseService, DateService dateService) {
+        this.databaseService = databaseService;
+        this.dateService = dateService;
+        this.authenticationService = authenticationService;
         when(databaseService.ofy()).thenReturn(mock(Objectify.class));
     }
 
@@ -45,6 +41,9 @@ public class MockMvcBehaviour {
         when(firebaseToken.getUid()).thenReturn("userId");
         when(firebaseToken.getEmail()).thenReturn("email");
         when(firebaseToken.getName()).thenReturn("name");
+        when(authenticationService.parseFirebaseToken(anyString())).thenReturn(firebaseToken);
+        when(authenticationService.getFirebaseToken()).thenCallRealMethod();
+        when(authenticationService.getUid()).thenCallRealMethod();
     }
 
     public void givenObjectifySaverIsMocked() {

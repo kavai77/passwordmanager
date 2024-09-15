@@ -9,7 +9,6 @@ import net.himadri.passwordmanager.entity.RegisteredUser;
 import net.himadri.passwordmanager.entity.UserSettings;
 import net.himadri.passwordmanager.security.AuthenticationService;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,7 +62,7 @@ public class UserController {
                 .cipherAlgorithm(cipherAlgorithm)
                 .keyLength(keyLength)
                 .pbkdf2Algorithm(pbkdf2Algorithm)
-                .salt(RandomStringUtils.random(10))
+                .salt(databaseService.randomString(10))
                 .build()).now();
     }
 
