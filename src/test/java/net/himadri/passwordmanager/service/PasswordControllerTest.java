@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PasswordControllerTest {
+public class PasswordControllerTest extends AbstractSpringBootTest{
     private static final Date SOME_DATE = new Date(10);
     private static final Date SOME_OTHER_DATE = new Date(20);
     private static final Date CURRENT_DATE = new Date(30);
