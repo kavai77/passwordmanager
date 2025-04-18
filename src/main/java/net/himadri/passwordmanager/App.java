@@ -28,7 +28,7 @@ public class App {
 
     @EventListener(ApplicationReadyEvent.class)
     public void applicationReadyEvent() throws IOException {
-        FirebaseOptions options = new FirebaseOptions.Builder()
+        FirebaseOptions options = FirebaseOptions.builder()
             .setCredentials(googleCredentials())
             .setProjectId("passwordmanager-1166")
             .setStorageBucket("passwordmanager-1166.appspot.com")

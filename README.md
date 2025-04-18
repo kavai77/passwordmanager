@@ -1,6 +1,6 @@
 # passwordmanager
 
-![Build Status](https://github.com/kavai77/passwordmanager/actions/workflows/cicd.yaml/badge.svg)
+[![CICD](https://github.com/kavai77/passwordmanager/actions/workflows/cicd.yaml/badge.svg)](https://github.com/kavai77/passwordmanager/actions/workflows/cicd.yaml)
 
 This project is an open source cryptography based password manager.
 
